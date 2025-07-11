@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #1a237e;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #1a237e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #1a237e;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #1a237e;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #283593;
+        }
+        .btn-danger {
+            background-color: #e53935;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+        .btn-success {
+            background-color: #43a047;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #388e3c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #1a237e;
+        }
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1a237e;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .stat-icon {
+            align-self: flex-end;
+            font-size: 1.5rem;
+            color: #1a237e;
+            opacity: 0.7;
+        }
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </div>
+                <div class="menu-item" onclick="showSection('students')">
+                    <i class="fas fa-user-graduate"></i> Students
+                </div>
+                <div class="menu-item" onclick="showSection('subjects')">
+                    <i class="fas fa-book"></i> Subjects
+                </div>
+                <div class="menu-item" onclick="showSection('attendance')">
+                    <i class="fas fa-calendar-check"></i> Attendance
+                </div>
+                <div class="menu-item" onclick="showSection('reports')">
+                    <i class="fas fa-chart-bar"></i> Reports
+                </div>
+                <div class="menu-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>Admin Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <div>Admin</div>
+                </div>
+            </div>
+            
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section-container">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+                        <div class="stat-value" id="total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-book"></i></div>
+                        <div class="stat-value" id="total-subjects">0</div>
+                        <div class="stat-label">Total Subjects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-value" id="attendance-rate">0%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="stat-value" id="today-attendance">0</div>
+                        <div class="stat-label">Today's Attendance</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Attendance Overview</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Activity</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activity-log">
+                            <!-- Activity logs will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Students Section -->
+            <div id="students-section" class="section-container hidden">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Manage Students</h2>
+                        <button class="btn btn-primary" onclick="openAddStudentModal()">
+                            <i class="fas fa-plus"></i> Add Student
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Student Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table">
+                            <!-- Students will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Subjects Section -->
+            <div id="subjects-section" class="section-container hidden">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Manage Subjects</h2>
+                        <button class="btn btn-primary" onclick="openAddSubjectModal()">
+                            <i class="fas fa-plus"></i> Add Subject
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjects-table">
+                            <!-- Subjects will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Attendance Section -->
+            <div id="attendance-section" class="section-container hidden">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Attendance Records</h2>
+                        <div>
+                            <input type="date" id="attendance-date-filter" onchange="filterAttendance()">
+                            <select id="subject-filter" onchange="filterAttendance()">
+                                <option value="">All Subjects</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Roll Number</th>
+                                <th>Student Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-table">
+                            <!-- Attendance records will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-container hidden">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Attendance Reports</h2>
+                        <div>
+                            <select id="report-type">
+                                <option value="daily">Daily Report</option>
+                                <option value="monthly">Monthly Report</option>
+                                <option value="subject">Subject-wise Report</option>
+                                <option value="student">Student-wise Report</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+                            <button class="btn btn-success" onclick="exportReport()">
+                                <i class="fas fa-file-excel"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    <div id="report-filters" class="form-row">
+                        <div class="form-group">
+                            <label>Date Range</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="date" id="report-start-date">
+                                <input type="date" id="report-end-date">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select id="report-subject">
+                                <option value="">All Subjects</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Student</label>
+                            <select id="report-student">
+                                <option value="">All Students</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                    <div id="report-table-container" style="margin-top: 20px;">
+                        <table id="report-table">
+                            <thead>
+                                <tr>
+                                    <!-- Report headers will be dynamically generated -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Report data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Student Modal -->
+    <div id="add-student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Student</h3>
+                <span class="close-modal" onclick="closeModal('add-student-modal')">&times;</span>
+            </div>
+            <form id="add-student-form">
+                <div class="form-group">
+                    <label for="student-roll">Roll Number</label>
+                    <input type="text" id="student-roll" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-name">Student Name</label>
+                    <input type="text" id="student-name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('add-student-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Student Modal -->
+    <div id="edit-student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Student</h3>
+                <span class="close-modal" onclick="closeModal('edit-student-modal')">&times;</span>
+            </div>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-student-roll">
+                <div class="form-group">
+                    <label for="edit-student-name">Student Name</label>
+                    <input type="text" id="edit-student-name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('edit-student-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Subject Modal -->
+    <div id="add-subject-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Subject</h3>
+                <span class="close-modal" onclick="closeModal('add-subject-modal')">&times;</span>
+            </div>
+            <form id="add-subject-form">
+                <div class="form-group">
+                    <label for="subject-code">Subject Code</label>
+                    <input type="text" id="subject-code" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject-name">Subject Name</label>
+                    <input type="text" id="subject-name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('add-subject-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Subject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Subject Modal -->
+    <div id="edit-subject-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Subject</h3>
+                <span class="close-modal" onclick="closeModal('edit-subject-modal')">&times;</span>
+            </div>
+            <form id="edit-subject-form">
+                <input type="hidden" id="edit-subject-code">
+                <div class="form-group">
+                    <label for="edit-subject-name">Subject Name</label>
+                    <input type="text" id="edit-subject-name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal('edit-subject-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Subject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data
+        if (!localStorage.getItem('studentData')) {
+            const defaultStudents = [
+                { "Roll Number": "1", "Student Name": "John Smith" },
+                { "Roll Number": "2", "Student Name": "Emma Johnson" },
+                { "Roll Number": "3", "Student Name": "Michael Brown" },
+                { "Roll Number": "4", "Student Name": "Sarah Davis" },
+                { "Roll Number": "5", "Student Name": "David Wilson" },
+                { "Roll Number": "6", "Student Name": "Lisa Anderson" },
+                { "Roll Number": "7", "Student Name": "James Taylor" },
+                { "Roll Number": "8", "Student Name": "Emily Thomas" },
+                { "Roll Number": "9", "Student Name": "Robert Martin" },
+                { "Roll Number": "10", "Student Name": "Jennifer White" }
+            ];
+            localStorage.setItem('studentData', JSON.stringify(defaultStudents));
+        }
+        
+        if (!localStorage.getItem('subjectData')) {
+            const defaultSubjects = [
+                { "Subject Code": "JAVA101", "Subject Name": "Java" },
+                { "Subject Code": "PY101", "Subject Name": "Python" },
+                { "Subject Code": "WD101", "Subject Name": "Web Development" },
+                { "Subject Code": "DB101", "Subject Name": "Database" },
+                { "Subject Code": "OS101", "Subject Name": "Operating System" }
+            ];
+            localStorage.setItem('subjectData', JSON.stringify(defaultSubjects));
+        }
+        
+        if (!localStorage.getItem('activityLog')) {
+            const defaultActivity = [
+                { date: new Date().toISOString(), activity: "System Initialization", details: "Admin dashboard initialized" }
+            ];
+            localStorage.setItem('activityLog', JSON.stringify(defaultActivity));
+        }
+        
+        // Set today's date as default for filters
+        document.getElementById('attendance-date-filter').valueAsDate = new Date();
+        document.getElementById('report-start-date').valueAsDate = new Date(new Date().setDate(new Date().getDate() - 30));
+        document.getElementById('report-end-date').valueAsDate = new Date();
+        
+        // Navigation functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section-container').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(`${sectionName}-section`).classList.remove('hidden');
+            
+            // Update active menu item
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Load section data
+            if (sectionName === 'dashboard') {
+                loadDashboard();
+            } else if (sectionName === 'students') {
+                loadStudents();
+            } else if (sectionName === 'subjects') {
+                loadSubjects();
+            } else if (sectionName === 'attendance') {
+                loadAttendance();
+            } else if (sectionName === 'reports') {
+                loadReportFilters();
+            }
+        }
+        
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function openAddStudentModal() {
+            document.getElementById('add-student-form').reset();
+            openModal('add-student-modal');
+        }
+        
+        function openEditStudentModal(rollNumber) {
+            const students = JSON.parse(localStorage.getItem('studentData'));
+            const student = students.find(s => s['Roll Number'] === rollNumber);
+            
+            if (student) {
+                document.getElementById('edit-student-roll').value = student['Roll Number'];
+                document.getElementById('edit-student-name').value = student['Student Name'];
+                openModal('edit-student-modal');
+            }
+        }
+        
+        function openAddSubjectModal() {
+            document.getElementById('add-subject-form').reset();
+            openModal('add-subject-modal');
+        }
+        
+        function openEditSubjectModal(subjectCode) {
+            const subjects = JSON.parse(localStorage.getItem('subjectData'));
+            const subject = subjects.find(s => s['Subject Code'] === subjectCode);
+            
+            if (subject) {
+                document.getElementById('edit-subject-code').value = subject['Subject Code'];
+                document.getElementById('edit-subject-name').value = subject['Subject Name'];
+                openModal('edit-subject-modal');
+            }
+        }
+        
+        // Dashboard functions
+        function loadDashboard() {
+            const students = JSON.parse(localStorage.getItem('studentData') || '[]');
+            const subjects = JSON.parse(localStorage.getItem('subjectData') || '[]');
+            const attendance = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+            
+            // Update stats
+            document.getElementById('total-students').textContent = students.length;
+            document.getElementById('total-subjects').textContent = subjects.length;
+            
+            // Calculate attendance rate
+            if (attendance.length > 0) {
+                const presentCount = attendance.filter(a => a.status === 'Present').length;
+                const attendanceRate = ((presentCount / attendance.length) * 100).toFixed(1);
+                document.getElementById('attendance-rate').textContent = `${attendanceRate}%`;
+            } else {
+                document.getElementById('attendance-rate').textContent = '0%';
+            }
+            
+            // Calculate today's attendance
+            const today = new Date().toISOString().split('T')[0];
+            const todayAttendance = attendance.filter(a => a.date === today);
+            document.getElementById('today-attendance').textContent = todayAttendance.length;
+            
+            // Load activity log
+            loadActivityLog();
+            
+            // Create attendance chart
+            createAttendanceChart();
+        }
+        
+        function loadActivityLog() {
+            const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
+            const tbody = document.getElementById('activity-log');
+            tbody.innerHTML = '';
+            
+            // Sort by date descending and take the last 10 entries
+            const recentActivity = activityLog.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+            
+            recentActivity.forEach(activity => {
+                const row = document.createElement('tr');
+                const date = new Date(activity.date);
+                
+                row.innerHTML = `
+                    <td>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</td>
+                    <td>${activity.activity}</td>
+                    <td>${activity.details}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function createAttendanceChart() {
+            const attendance = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+            
+            // Get last 7 days
+            const dates = [];
+            const presentCounts = [];
+            const absentCounts = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                
+                const dayAttendance = attendance.filter(a => a.date === dateString);
+                const presentCount = dayAttendance.filter(a => a.status === 'Present').length;
+                const absentCount = dayAttendance.filter(a => a.status === 'Absent').length;
+                
+                dates.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+                presentCounts.push(presentCount);
+                absentCounts.push(absentCount);
+            }
+            
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            
+            if (window.attendanceOverviewChart) {
+                window.attendanceOverviewChart.destroy();
+            }
+            
+            window.attendanceOverviewChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Present',
+                            data: presentCounts,
+                            backgroundColor: '#43a047',
+                            borderColor: '#388e3c',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Absent',
+                            data: absentCounts,
+                            backgroundColor: '#e53935',
+                            borderColor: '#c62828',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Students'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Attendance Overview (Last 7 Days)',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Students functions
+        function loadStudents() {
+            const students = JSON.parse(localStorage.getItem('studentData') || '[]');
+            const tbody = document.getElementById('students-table');
+            tbody.innerHTML = '';
+            
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${student['Roll Number']}</td>
+                    <td>${student['Student Name']}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-primary" onclick="openEditStudentModal('${student['Roll Number']}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteStudent('${student['Roll Number']}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function addStudent(event) {
+            event.preventDefault();
+            
+            const rollNumber = document.getElementById('student-roll').value;
+            const studentName = document.getElementById('student-name').value;
+            
+            const students = JSON.parse(localStorage.getItem('studentData') || '[]');
+            
+            // Check if roll number already exists
+            if (students.some(s => s['Roll Number'] === rollNumber)) {
+                alert('A student with this roll number already exists!');
+                return;
+            }
+            
+            // Add new student
+            students.push({
+                'Roll Number': rollNumber,
+                'Student Name': studentName
+            });
+            
+            localStorage.setItem('studentData', JSON.stringify(students));
+            
+            // Log activity
+            logActivity('Student Added', `Added student ${studentName} with roll number ${rollNumber}`);
+            
+            // Reload students table
+            loadStudents();
+            
+            // Close modal
+            closeModal('add-student-modal');
+        }
+        
+        function updateStudent(event) {
+            event.preventDefault();
+            
+            const rollNumber = document.getElementById('edit-student-roll').value;
+            const studentName = document.getElementById('edit-student-name').value;
+            
+            const students = JSON.parse(localStorage.getItem('studentData'));
+            
+            // Find and update student
+            const updatedStudents = students.map(student => {
+                if (student['Roll Number'] === rollNumber) {
+                    return {
+                        'Roll Number': rollNumber,
+                        'Student Name': studentName
+                    };
+                }
+                return student;
+            });
+            
+            localStorage.setItem('studentData', JSON.stringify(updatedStudents));
+            
+            // Log activity
+            logActivity('Student Updated', `Updated student with roll number ${rollNumber}`);
+            
+            // Reload students table
+            loadStudents();
+            
+            // Close modal
+            closeModal('edit-student-modal');
+        }
+        
+        function deleteStudent(rollNumber) {
+            if (!confirm(`Are you sure you want to delete student with roll number ${rollNumber}?`)) {
+                return;
+            }
+            
+            const students = JSON.parse(localStorage.getItem('studentData'));
+            
+            // Find student name for activity log
+            const student = students.find(s => s['Roll Number'] === rollNumber);
+            const studentName = student ? student['Student Name'] : 'Unknown';
+            
+            // Remove student
+            const updatedStudents = students.filter(student => student['Roll Number'] !== rollNumber);
+            localStorage.setItem('studentData', JSON.stringify(updatedStudents));
+            
+            // Log activity
+            logActivity('Student Deleted', `Deleted student ${studentName} with roll number ${rollNumber}`);
+            
+            // Reload students table
+            loadStudents();
+        }
+        
+        // Subjects functions
+        function loadSubjects() {
+            const subjects = JSON.parse(localStorage.getItem('subjectData') || '[]');
+            const tbody = document.getElementById('subjects-table');
+            tbody.innerHTML = '';
+            
+            subjects.forEach(subject => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${subject['Subject Code']}</td>
+                    <td>${subject['Subject Name']}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-primary" onclick="openEditSubjectModal('${subject['Subject Code']}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteSubject('${subject['Subject Code']}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function addSubject(event) {
+            event.preventDefault();
+            
+            const subjectCode = document.getElementById('subject-code').value;
+            const subjectName = document.getElementById('subject-name').value;
+            
+            const subjects = JSON.parse(localStorage.getItem('subjectData') || '[]');
+            
+            // Check if subject code already exists
+            if (subjects.some(s => s['Subject Code'] === subjectCode)) {
+                alert('A subject with this code already exists!');
+                return;
+            }
+            
+            // Add new subject
+            subjects.push({
+                'Subject Code': subjectCode,
+                'Subject Name': subjectName
+            });
+            
+            localStorage.setItem('subjectData', JSON.stringify(subjects));
+            
+            // Log activity
+            logActivity('Subject Added', `Added subject ${subjectName} with code ${subjectCode}`);
+            
+            // Reload subjects table
+            loadSubjects();
+            
+            // Close modal
+            closeModal('add-subject-modal');
+        }
+        
+        function updateSubject(event) {
+            event.preventDefault();
+            
+            const subjectCode = document.getElementById('edit-subject-code').value;
+            const subjectName = document.getElementById('edit-subject-name').value;
+            
+            const subjects = JSON.parse(localStorage.getItem('subjectData'));
+            
+            // Find and update subject
+            const updatedSubjects = subjects.map(subject => {
+                if (subject['Subject Code'] === subjectCode) {
+                    return {
+                        'Subject Code': subjectCode,
+                        'Subject Name': subjectName
+                    };
+                }
+                return subject;
+            });
+            
+            localStorage.setItem('subjectData', JSON.stringify(updatedSubjects));
+            
+            // Log activity
+            logActivity('Subject Updated', `Updated subject with code ${subjectCode}`);
+            
+            // Reload subjects table
+            loadSubjects();
+            
+            // Close modal
+            closeModal('edit-subject-modal');
+        }
+        
+        function deleteSubject(subjectCode) {
+            if (!confirm(`Are you sure you want to delete subject with code ${subjectCode}?`)) {
+                return;
+            }
+            
+            const subjects = JSON.parse(localStorage.getItem('subjectData'));
+            
+            // Find subject name for activity log
+            const subject = subjects.find(s => s['Subject Code'] === subjectCode);
+            const subjectName = subject ? subject['Subject Name'] : 'Unknown';
+            
+            // Remove subject
+            const updatedSubjects = subjects.filter(subject => subject['Subject Code'] !== subjectCode);
+            localStorage.setItem('subjectData', JSON.stringify(updatedSubjects));
+            
+            // Log activity
+            logActivity('Subject Deleted', `Deleted subject ${subjectName} with code ${subjectCode}`);
+            
+            // Reload subjects table
+            loadSubjects();
+        }
+        
+        // Attendance functions
+        function loadAttendance() {
+            const attendance = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+            const subjects = JSON.parse(localStorage.getItem('subjectData') || '[]');
+            
+            // Populate subject filter
+            const subjectFilter = document.getElementById('subject-filter');
+            subjectFilter.innerHTML = '<option value="">All Subjects</option>';
+            
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject['Subject Name'];
+                option.textContent = subject['Subject Name'];
+                subjectFilter.appendChild(option);
+            });
+            
+            // Filter attendance records
+            filterAttendance();
+        }
+        
+        function filterAttendance() {
+            const attendance = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+            const dateFilter = document.getElementById('attendance-date-filter').value;
+            const subjectFilter = document.getElementById('subject-filter').value;
+            
+            let filteredAttendance = attendance;
+            
+            if (dateFilter) {
+                filteredAttendance = filteredAttendance.filter(record => record.date === dateFilter);
+            }
+            
+            if (subjectFilter) {
+                filteredAttendance = filteredAttendance.filter(record => record.subject === subjectFilter);
+            }
+            
+            // Display filtered records
+            const tbody = document.getElementById('attendance-table');
+            tbody.innerHTML = '';
+            
+            filteredAttendance.forEach(record => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.subject}</td>
+                    <td>${record.rollNumber}</td>
+                    <td>${record.studentName}</td>
+                    <td>${record.status}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-danger" onclick="deleteAttendance('${record.date}', '${record.subject}', '${record.rollNumber}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function deleteAttendance(date, subject, rollNumber) {
+            if (!confirm(`Are you sure you want to delete this attendance record?`)) {
+                return;
+            }
+            
+            const attendance = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+            
+            // Remove attendance record
+            const updatedAttendance = attendance.filter(record => 
+                !(record.date === date && record.subject === subject && record.rollNumber === rollNumber)
+            );
+            
+            localStorage.setItem('attendanceData', JSON.stringify(updatedAttendance));
+            
+            // Log activity
+            logActivity('Attendance Deleted', `Deleted attendance record for ${subject} on ${date} for roll number ${rollNumber}`);
+            
+            // Reload attendance table
+            filterAttendance();
+        }
+        
+        // Reports functions
+        function loadReportFilters() {
+            const subjects = JSON.parse(localStorage.getItem('subjectData') || '[]');
+            const students = JSON.parse(localStorage.getItem('studentData') || '[]');
+            
+            // Populate subject filter
+            const subjectFilter = document.getElementById('report-subject');
+            subjectFilter.innerHTML = '<option value="">All Subjects</option>';
+            
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject['Subject Name'];
+                option.textContent = subject['Subject Name'];
+                subjectFilter.appendChild(option);
+            });
+            
+            // Populate student filter
+            const studentFilter = document.getElementById('report-student');
+            studentFilter.innerHTML = '<option value="">All Students</option>';
+            
+            students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student['Roll Number'];
+                option.textContent = `${student['Roll Number']} - ${student['Student Name']}`;
+                studentFilter.appendChild(option);
+            });
+        }
+        
+        function generateReport() {
+            const reportType = document.getElementById('report-type').value;
+            const startDate = document.getElementById('report-start-date').value;
+            const endDate = document.getElementById('report-end-date').value;
+            const subject = document.getElementById('report-subject').value;
+            const student = document.getElementById('report-student').value;
+            
+            const attendance = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+            
+            // Filter attendance records
+            let filteredAttendance = attendance;
+            
+            if (startDate && endDate) {
+                filteredAttendance = filteredAttendance.filter(record => 
+                    record.date >= startDate && record.date <= endDate
+                );
+            }
+            
+            if (subject) {
+                filteredAttendance = filteredAttendance.filter(record => record.subject === subject);
+            }
+            
+            if (student) {
+                filteredAttendance = filteredAttendance.filter(record => record.rollNumber === student);
+            }
+            
+            // Generate report based on type
+            if (reportType === 'daily') {
+                generateDailyReport(filteredAttendance);
+            } else if (reportType === 'monthly') {
+                generateMonthlyReport(filteredAttendance);
+            } else if (reportType === 'subject') {
+                generateSubjectReport(filteredAttendance);
+            } else if (reportType === 'student') {
+                generateStudentReport(filteredAttendance);
+            }
+            
+            // Log activity
+            logActivity('Report Generated', `Generated ${reportType} report`);
+        }
+        
+        function generateDailyReport(attendance) {
+            // Group by date
+            const groupedByDate = {};
+            
+            attendance.forEach(record => {
+                if (!groupedByDate[record.date]) {
+                    groupedByDate[record.date] = {
+                        total: 0,
+                        present: 0,
+                        absent: 0
+                    };
+                }
+                
+                groupedByDate[record.date].total++;
+                if (record.status === 'Present') {
+                    groupedByDate[record.date].present++;
+                } else {
+                    groupedByDate[record.date].absent++;
+                }
+            });
+            
+            // Prepare data for chart and table
+            const dates = Object.keys(groupedByDate).sort();
+            const presentCounts = dates.map(date => groupedByDate[date].present);
+            const absentCounts = dates.map(date => groupedByDate[date].absent);
+            const attendanceRates = dates.map(date => 
+                ((groupedByDate[date].present / groupedByDate[date].total) * 100).toFixed(1)
+            );
+            
+            // Create chart
+            createReportChart('Daily Attendance Report', dates, presentCounts, absentCounts);
+            
+            // Create table
+            const tableHead = document.querySelector('#report-table thead tr');
+            tableHead.innerHTML = `
+                <th>Date</th>
+                <th>Total Students</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Attendance Rate</th>
+            `;
+            
+            const tableBody = document.querySelector('#report-table tbody');
+            tableBody.innerHTML = '';
+            
+            dates.forEach((date, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td>${groupedByDate[date].total}</td>
+                    <td>${groupedByDate[date].present}</td>
+                    <td>${groupedByDate[date].absent}</td>
+                    <td>${attendanceRates[index]}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function generateMonthlyReport(attendance) {
+            // Group by month
+            const groupedByMonth = {};
+            
+            attendance.forEach(record => {
+                const month = record.date.substring(0, 7); // YYYY-MM
+                
+                if (!groupedByMonth[month]) {
+                    groupedByMonth[month] = {
+                        total: 0,
+                        present: 0,
+                        absent: 0
+                    };
+                }
+                
+                groupedByMonth[month].total++;
+                if (record.status === 'Present') {
+                    groupedByMonth[month].present++;
+                } else {
+                    groupedByMonth[month].absent++;
+                }
+            });
+            
+            // Prepare data for chart and table
+            const months = Object.keys(groupedByMonth).sort();
+            const presentCounts = months.map(month => groupedByMonth[month].present);
+            const absentCounts = months.map(month => groupedByMonth[month].absent);
+            const attendanceRates = months.map(month => 
+                ((groupedByMonth[month].present / groupedByMonth[month].total) * 100).toFixed(1)
+            );
+            
+            // Format month labels
+            const monthLabels = months.map(month => {
+                const date = new Date(month + '-01');
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+            });
+            
+            // Create chart
+            createReportChart('Monthly Attendance Report', monthLabels, presentCounts, absentCounts);
+            
+            // Create table
+            const tableHead = document.querySelector('#report-table thead tr');
+            tableHead.innerHTML = `
+                <th>Month</th>
+                <th>Total Records</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Attendance Rate</th>
+            `;
+            
+            const tableBody = document.querySelector('#report-table tbody');
+            tableBody.innerHTML = '';
+            
+            months.forEach((month, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${monthLabels[index]}</td>
+                    <td>${groupedByMonth[month].total}</td>
+                    <td>${groupedByMonth[month].present}</td>
+                    <td>${groupedByMonth[month].absent}</td>
+                    <td>${attendanceRates[index]}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function generateSubjectReport(attendance) {
+            // Group by subject
+            const groupedBySubject = {};
+            
+            attendance.forEach(record => {
+                if (!groupedBySubject[record.subject]) {
+                    groupedBySubject[record.subject] = {
+                        total: 0,
+                        present: 0,
+                        absent: 0
+                    };
+                }
+                
+                groupedBySubject[record.subject].total++;
+                if (record.status === 'Present') {
+                    groupedBySubject[record.subject].present++;
+                } else {
+                    groupedBySubject[record.subject].absent++;
+                }
+            });
+            
+            // Prepare data for chart and table
+            const subjects = Object.keys(groupedBySubject).sort();
+            const presentCounts = subjects.map(subject => groupedBySubject[subject].present);
+            const absentCounts = subjects.map(subject => groupedBySubject[subject].absent);
+            const attendanceRates = subjects.map(subject => 
+                ((groupedBySubject[subject].present / groupedBySubject[subject].total) * 100).toFixed(1)
+            );
+            
+            // Create chart
+            createReportChart('Subject-wise Attendance Report', subjects, presentCounts, absentCounts);
+            
+            // Create table
+            const tableHead = document.querySelector('#report-table thead tr');
+            tableHead.innerHTML = `
+                <th>Subject</th>
+                <th>Total Records</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Attendance Rate</th>
+            `;
+            
+            const tableBody = document.querySelector('#report-table tbody');
+            tableBody.innerHTML = '';
+            
+            subjects.forEach((subject, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${subject}</td>
+                    <td>${groupedBySubject[subject].total}</td>
+                    <td>${groupedBySubject[subject].present}</td>
+                    <td>${groupedBySubject[subject].absent}</td>
+                    <td>${attendanceRates[index]}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function generateStudentReport(attendance) {
+            // Group by student
+            const groupedByStudent = {};
+            
+            attendance.forEach(record => {
+                const studentKey = `${record.rollNumber} - ${record.studentName}`;
+                
+                if (!groupedByStudent[studentKey]) {
+                    groupedByStudent[studentKey] = {
+                        total: 0,
+                        present: 0,
+                        absent: 0
+                    };
+                }
+                
+                groupedByStudent[studentKey].total++;
+                if (record.status === 'Present') {
+                    groupedByStudent[studentKey].present++;
+                } else {
+                    groupedByStudent[studentKey].absent++;
+                }
+            });
+            
+            // Prepare data for chart and table
+            const students = Object.keys(groupedByStudent).sort();
+            const presentCounts = students.map(student => groupedByStudent[student].present);
+            const absentCounts = students.map(student => groupedByStudent[student].absent);
+            const attendanceRates = students.map(student => 
+                ((groupedByStudent[student].present / groupedByStudent[student].total) * 100).toFixed(1)
+            );
+            
+            // Create chart (limit to top 10 students for readability)
+            const top10Students = students.slice(0, 10);
+            const top10Present = presentCounts.slice(0, 10);
+            const top10Absent = absentCounts.slice(0, 10);
+            
+            createReportChart('Student-wise Attendance Report (Top 10)', top10Students, top10Present, top10Absent);
+            
+            // Create table
+            const tableHead = document.querySelector('#report-table thead tr');
+            tableHead.innerHTML = `
+                <th>Student</th>
+                <th>Total Records</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Attendance Rate</th>
+            `;
+            
+            const tableBody = document.querySelector('#report-table tbody');
+            tableBody.innerHTML = '';
+            
+            students.forEach((student, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${student}</td>
+                    <td>${groupedByStudent[student].total}</td>
+                    <td>${groupedByStudent[student].present}</td>
+                    <td>${groupedByStudent[student].absent}</td>
+                    <td>${attendanceRates[index]}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function createReportChart(title, labels, presentData, absentData) {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            
+            if (window.reportChart) {
+                window.reportChart.destroy();
+            }
+            
+            window.reportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Present',
+                            data: presentData,
+                            backgroundColor: '#43a047',
+                            borderColor: '#388e3c',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Absent',
+                            data: absentData,
+                            backgroundColor: '#e53935',
+                            borderColor: '#c62828',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Students'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function exportReport() {
+            const reportType = document.getElementById('report-type').value;
+            const table = document.getElementById('report-table');
+            
+            // Get headers
+            const headerCells = table.querySelectorAll('thead th');
+            const headers = Array.from(headerCells).map(cell => cell.textContent);
+            
+            // Get data rows
+            const rows = table.querySelectorAll('tbody tr');
+            const data = [headers];
+            
+            rows.forEach(row => {
+                const rowData = Array.from(row.cells).map(cell => {
+                    // Remove % sign from percentage values
+                    const text = cell.textContent;
+                    return text.endsWith('%') ? text.slice(0, -1) : text;
+                });
+                data.push(rowData);
+            });
+            
+            // Create workbook and worksheet
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Report");
+            
+            // Generate filename
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `${reportType}_report_${date}.xlsx`;
+            
+            // Generate Excel file and trigger download
+            XLSX.writeFile(wb, filename);
+            
+            // Log activity
+            logActivity('Report Exported', `Exported ${reportType} report to Excel`);
+        }
+        
+        // Utility functions
+        function logActivity(activity, details) {
+            const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
+            
+            activityLog.push({
+                date: new Date().toISOString(),
+                activity: activity,
+                details: details
+            });
+            
+            localStorage.setItem('activityLog', JSON.stringify(activityLog));
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                logActivity('Logout', 'Admin logged out');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('add-student-form').addEventListener('submit', addStudent);
+        document.getElementById('edit-student-form').addEventListener('submit', updateStudent);
+        document.getElementById('add-subject-form').addEventListener('submit', addSubject);
+        document.getElementById('edit-subject-form').addEventListener('submit', updateSubject);
+        
+        // Initialize dashboard
+        loadDashboard();
+    </script>
+</body>
+</html>

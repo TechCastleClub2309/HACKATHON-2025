@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        /* Header Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-left h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header-left p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+        
+        .user-info p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+        
+        /* Main Content */
+        .tab-content {
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .btn i {
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+        
+        .btn-success {
+            background-color: #38b000;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #2d8c00;
+        }
+        
+        .btn-warning {
+            background-color: #ff9e00;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e68a00;
+        }
+        
+        .btn-danger {
+            background-color: #e63946;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d00000;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        thead {
+            background-color: var(--light);
+        }
+        
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tbody tr {
+            transition: var(--transition);
+        }
+        
+        tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .status-present {
+            background-color: rgba(76, 201, 240, 0.1);
+        }
+        
+        .status-absent {
+            background-color: rgba(247, 37, 133, 0.1);
+        }
+        
+        .status-late {
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+        
+        .attendance-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .stat-icon.present {
+            background-color: #4cc9f0;
+        }
+        
+        .stat-icon.absent {
+            background-color: #f72585;
+        }
+        
+        .stat-icon.late {
+            background-color: #ff9e00;
+        }
+        
+        .stat-icon.total {
+            background-color: #4361ee;
+        }
+        
+        .stat-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .stat-content p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .dashboard-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .header-right {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .user-info {
+                text-align: center;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1 0 33%;
+            }
+            
+            .btn-group {
+                flex-wrap: wrap;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .attendance-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>Teacher Dashboard</h1>
+                <p>Manage students, track attendance, and generate reports</p>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <h3>Dr. Sarah Johnson</h3>
+                    <p>Computer Science Department</p>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="showTab('students')">
+                <i class="fas fa-users"></i> Students
+            </button>
+            <button class="tab-btn" onclick="showTab('daily-attendance')">
+                <i class="fas fa-calendar-day"></i> Daily Attendance
+            </button>
+            <button class="tab-btn" onclick="showTab('monthly-report')">
+                <i class="fas fa-chart-bar"></i> Monthly Report
+            </button>
+            <button class="tab-btn" onclick="showTab('analytics')">
+                <i class="fas fa-chart-pie"></i> Analytics
+            </button>
+        </nav>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content active">
+            <div class="section-header">
+                <h2>Student Management</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-file-import"></i> Import Excel
+                    </button>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(this)">
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export to Excel
+                    </button>
+                    <button class="btn btn-warning" onclick="toggleAddForm()">
+                        <i class="fas fa-user-plus"></i> Add Student
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Student Form -->
+            <div id="addStudentForm" style="display: none; margin-bottom: 25px; padding: 20px; background-color: var(--light); border-radius: 8px;">
+                <h3 style="margin-bottom: 15px;">Add New Student</h3>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="rollNumber">Roll Number</label>
+                        <input type="text" id="rollNumber" placeholder="Enter roll number">
+                    </div>
+                    <div class="form-control">
+                        <label for="studentName">Student Name</label>
+                        <input type="text" id="studentName" placeholder="Enter student name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="studentClass">Class</label>
+                        <select id="studentClass">
+                            <option value="BCA">BCA</option>
+                            <option value="BSc">BSc Computer Science</option>
+                            <option value="MCA">MCA</option>
+                            <option value="MSc">MSc Computer Science</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label for="studentSection">Section</label>
+                        <select id="studentSection">
+                            <option value="Management">Management</option>
+                            <option value="Science">Science</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Commerce">Commerce</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-top: 15px;">
+                    <button class="btn btn-outline" onclick="toggleAddForm()">Cancel</button>
+                    <button class="btn btn-success" onclick="addStudent()">Save Student</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>Roll Number</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Join Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>BCA101</td>
+                            <td>John Smith</td>
+                            <td>BCA</td>
+                            <td>Management</td>
+                            <td>2023-08-15</td>
+                            <td class="action-cell">
+                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>BCA102</td>
+                            <td>Emma Johnson</td>
+                            <td>BCA</td>
+                            <td>Management</td>
+                            <td>2023-08-15</td>
+                            <td class="action-cell">
+                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>BCA103</td>
+                            <td>Michael Brown</td>
+                            <td>BCA</td>
+                            <td>Management</td>
+                            <td>2023-08-15</td>
+                            <td class="action-cell">
+                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>BCA104</td>
+                            <td>Sarah Williams</td>
+                            <td>BCA</td>
+                            <td>Management</td>
+                            <td>2023-08-15</td>
+                            <td class="action-cell">
+                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Daily Attendance Tab -->
+        <div id="daily-attendance" class="tab-content">
+            <div class="section-header">
+                <h2>Daily Attendance Tracking</h2>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="exportDailyAttendance()">
+                        <i class="fas fa-file-export"></i> Export Attendance
+                    </button>
+                    <button class="btn btn-primary" onclick="saveAttendance()">
+                        <i class="fas fa-save"></i> Save Attendance
+                    </button>
+                </div>
+            </div>
+            
+            <div class="attendance-controls">
+                <div class="form-control">
+                    <label for="attendanceDate">Date</label>
+                    <input type="date" id="attendanceDate" value="">
+                </div>
+                <div class="form-control">
+                    <label for="subjectSelect">Subject</label>
+                    <select id="subjectSelect">
+                        <option value="">Select Subject</option>
+                        <option value="Java">Java Programming</option>
+                        <option value="Python">Python Programming</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="Database">Database Systems</option>
+                        <option value="Operating System">Operating System</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="loadAttendanceSheet()" style="margin-top: 7px;">
+                        <i class="fas fa-sync"></i> Load Students
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Roll Number</th>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="status-present">
+                            <td>BCA101</td>
+                            <td>John Smith</td>
+                            <td>
+                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                    <option value="Present" selected>Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Late">Late</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" value="" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            </td>
+                        </tr>
+                        <tr class="status-late">
+                            <td>BCA102</td>
+                            <td>Emma Johnson</td>
+                            <td>
+                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Late" selected>Late</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" value="Arrived 15 minutes late" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            </td>
+                        </tr>
+                        <tr class="status-absent">
+                            <td>BCA103</td>
+                            <td>Michael Brown</td>
+                            <td>
+                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                    <option value="Present">Present</option>
+                                    <option value="Absent" selected>Absent</option>
+                                    <option value="Late">Late</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" value="Medical leave" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            </td>
+                        </tr>
+                        <tr class="status-present">
+                            <td>BCA104</td>
+                            <td>Sarah Williams</td>
+                            <td>
+                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                    <option value="Present" selected>Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Late">Late</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" value="" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Monthly Report Tab -->
+        <div id="monthly-report" class="tab-content">
+            <div class="section-header">
+                <h2>Monthly Attendance Report</h2>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="exportMonthlyReport()">
+                        <i class="fas fa-file-export"></i> Export Report
+                    </button>
+                </div>
+            </div>
+            
+            <div class="attendance-controls">
+                <div class="form-control">
+                    <label for="monthPicker">Month</label>
+                    <select id="monthPicker" onchange="generateMonthlyReport()">
+                        <option value="2023-01">January 2023</option>
+                        <option value="2023-02">February 2023</option>
+                        <option value="2023-03">March 2023</option>
+                        <option value="2023-04">April 2023</option>
+                        <option value="2023-05">May 2023</option>
+                        <option value="2023-06">June 2023</option>
+                        <option value="2023-07" selected>July 2023</option>
+                        <option value="2023-08">August 2023</option>
+                        <option value="2023-09">September 2023</option>
+                        <option value="2023-10">October 2023</option>
+                        <option value="2023-11">November 2023</option>
+                        <option value="2023-12">December 2023</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label for="monthlySubjectSelect">Subject</label>
+                    <select id="monthlySubjectSelect" onchange="generateMonthlyReport()">
+                        <option value="">All Subjects</option>
+                        <option value="Java">Java Programming</option>
+                        <option value="Python">Python Programming</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="Database">Database Systems</option>
+                        <option value="Operating System">Operating System</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="monthlyReportTable">
+                    <thead>
+                        <tr>
+                            <th>Roll Number</th>
+                            <th>Student Name</th>
+                            <th>Total Classes</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Late</th>
+                            <th>Attendance %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>BCA101</td>
+                            <td>John Smith</td>
+                            <td>18</td>
+                            <td>16</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>88.9%</td>
+                        </tr>
+                        <tr>
+                            <td>BCA102</td>
+                            <td>Emma Johnson</td>
+                            <td>18</td>
+                            <td>17</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>94.4%</td>
+                        </tr>
+                        <tr>
+                            <td>BCA103</td>
+                            <td>Michael Brown</td>
+                            <td>18</td>
+                            <td>15</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>83.3%</td>
+                        </tr>
+                        <tr>
+                            <td>BCA104</td>
+                            <td>Sarah Williams</td>
+                            <td>18</td>
+                            <td>18</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>100.0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="section-header">
+                <h2>Attendance Analytics</h2>
+                <div class="btn-group">
+                    <button class="btn btn-success">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>42</h3>
+                        <p>Total Students</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon present">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>78.3%</h3>
+                        <p>Average Attendance</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon absent">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>12</h3>
+                        <p>Most Absent Student</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon late">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>24</h3>
+                        <p>Late Arrivals (This Month)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: var(--shadow);">
+                <h3 style="margin-bottom: 20px;">Attendance Trends</h3>
+                <div style="height: 300px; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
+                    [Attendance Chart Visualization]
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>Teacher Dashboard &copy; 2023 | Computer Science Department</p>
+        </footer>
+    </div>
+
+    <script>
+        // Set default date to today
+        document.getElementById('attendanceDate').valueAsDate = new Date();
+        
+        // Tab navigation
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and set button active
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+        
+        // Toggle add student form
+        function toggleAddForm() {
+            const form = document.getElementById('addStudentForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Add new student
+        function addStudent() {
+            const rollNumber = document.getElementById('rollNumber').value;
+            const studentName = document.getElementById('studentName').value;
+            const studentClass = document.getElementById('studentClass').value;
+            const studentSection = document.getElementById('studentSection').value;
+            
+            if (!rollNumber || !studentName) {
+                alert('Please fill in both Roll Number and Student Name');
+                return;
+            }
+            
+            const table = document.querySelector('#studentTable tbody');
+            const newRow = document.createElement('tr');
+            const today = new Date().toISOString().split('T')[0];
+            
+            newRow.innerHTML = `
+                <td>${rollNumber}</td>
+                <td>${studentName}</td>
+                <td>${studentClass}</td>
+                <td>${studentSection}</td>
+                <td>${today}</td>
+                <td class="action-cell">
+                    <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            
+            table.appendChild(newRow);
+            
+            // Clear form and hide
+            document.getElementById('rollNumber').value = '';
+            document.getElementById('studentName').value = '';
+            toggleAddForm();
+            
+            alert('Student added successfully!');
+        }
+        
+        // Update row status in attendance
+        function updateRowStatus(selectElement) {
+            const row = selectElement.closest('tr');
+            const status = selectElement.value;
+            
+            // Remove all status classes
+            row.classList.remove('status-present', 'status-absent', 'status-late');
+            
+            // Add appropriate class
+            if (status === 'Present') {
+                row.classList.add('status-present');
+            } else if (status === 'Absent') {
+                row.classList.add('status-absent');
+            } else if (status === 'Late') {
+                row.classList.add('status-late');
+            }
+        }
+        
+        // Load attendance sheet
+        function loadAttendanceSheet() {
+            const date = document.getElementById('attendanceDate').value;
+            const subject = document.getElementById('subjectSelect').value;
+            
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+            
+            if (!subject) {
+                alert('Please select a subject');
+                return;
+            }
+            
+            alert(`Loading attendance sheet for ${date} - ${subject}`);
+        }
+        
+        // Save attendance
+        function saveAttendance() {
+            alert('Attendance saved successfully!');
+        }
+        
+        // Export to Excel
+        function exportToExcel() {
+            alert('Exporting student data to Excel...');
+        }
+        
+        // Export daily attendance
+        function exportDailyAttendance() {
+            alert('Exporting daily attendance to Excel...');
+        }
+        
+        // Export monthly report
+        function exportMonthlyReport() {
+            alert('Exporting monthly report to Excel...');
+        }
+        
+        // Generate monthly report
+        function generateMonthlyReport() {
+            const month = document.getElementById('monthPicker').value;
+            const subject = document.getElementById('monthlySubjectSelect').value;
+            
+            alert(`Generating report for ${month} - ${subject || 'All Subjects'}`);
+        }
+    </script>
+</body>
+</html>

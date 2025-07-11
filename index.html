@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Student Portal</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</li>
+                <li data-tab="attendance"><i class="fas fa-calendar-check"></i> Attendance</li>
+                <li data-tab="reports"><i class="fas fa-chart-bar"></i> Reports</li>
+                <li data-tab="defaulters"><i class="fas fa-exclamation-triangle"></i> Defaulters</li>
+                <li data-tab="notes"><i class="fas fa-sticky-note"></i> Notes</li>
+            </ul>
+            <div class="user-info">
+                <img src="https://via.placeholder.com/50" alt="User">
+                <div>
+                    <h4>John Doe</h4>
+                    <p>Student ID: S12345</p>
+                </div>
+            </div>
+        </nav>
+
+        <main class="content">
+            <header>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="header-right">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="settings">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="tab-content active" id="dashboard">
+                <h1>Dashboard</h1>
+                <div class="dashboard-summary">
+                    <div class="summary-card">
+                        <div class="card-icon attendance-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="card-info">
+                            <h3>Attendance</h3>
+                            <p class="percentage">85%</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon performance-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="card-info">
+                            <h3>Performance</h3>
+                            <p class="percentage">78%</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon assignments-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="card-info">
+                            <h3>Assignments</h3>
+                            <p>12/15 Completed</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon exams-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="card-info">
+                            <h3>Upcoming Exams</h3>
+                            <p>2 Exams</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-container">
+                        <h2>Attendance Overview</h2>
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>Performance Trend</h2>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-activities">
+                    <h2>Recent Activities</h2>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-file-upload"></i></div>
+                            <div class="activity-details">
+                                <h4>Assignment Submitted</h4>
+                                <p>You submitted Data Structure Assignment #5</p>
+                                <span class="activity-time">2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="activity-details">
+                                <h4>Attendance Marked</h4>
+                                <p>You were marked present for all classes today</p>
+                                <span class="activity-time">Yesterday</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="activity-details">
+                                <h4>Test Result</h4>
+                                <p>You scored 85% in Mathematics Quiz</p>
+                                <span class="activity-time">2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="attendance">
+                <h1>Attendance Record</h1>
+                <div class="attendance-filters">
+                    <select id="monthFilter">
+                        <option value="all">All Months</option>
+                        <option value="jan">January</option>
+                        <option value="feb">February</option>
+                        <option value="mar">March</option>
+                        <option value="apr">April</option>
+                        <option value="may">May</option>
+                        <option value="jun">June</option>
+                    </select>
+                    <select id="subjectFilter">
+                        <option value="all">All Subjects</option>
+                        <option value="math">Mathematics</option>
+                        <option value="physics">Physics</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="biology">Biology</option>
+                        <option value="english">English</option>
+                    </select>
+                </div>
+
+                <div class="attendance-summary-cards">
+                    <div class="summary-card">
+                        <h3>Overall Attendance</h3>
+                        <p class="percentage">85%</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Present Days</h3>
+                        <p>34 days</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Absent Days</h3>
+                        <p>6 days</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Leave Days</h3>
+                        <p>2 days</p>
+                    </div>
+                </div>
+
+                <div class="attendance-chart-container">
+                    <h2>Monthly Attendance</h2>
+                    <canvas id="monthlyAttendanceChart"></canvas>
+                </div>
+
+                <div class="attendance-table">
+                    <h2>Detailed Attendance</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>15 May 2023</td>
+                                <td>Mathematics</td>
+                                <td class="status-present">Present</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>15 May 2023</td>
+                                <td>Physics</td>
+                                <td class="status-present">Present</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>14 May 2023</td>
+                                <td>Chemistry</td>
+                                <td class="status-absent">Absent</td>
+                                <td>Medical Leave</td>
+                            </tr>
+                            <tr>
+                                <td>14 May 2023</td>
+                                <td>Biology</td>
+                                <td class="status-absent">Absent</td>
+                                <td>Medical Leave</td>
+                            </tr>
+                            <tr>
+                                <td>13 May 2023</td>
+                                <td>Mathematics</td>
+                                <td class="status-present">Present</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="reports">
+                <h1>Academic Reports</h1>
+                
+                <div class="report-summary">
+                    <div class="summary-card">
+                        <h3>Current GPA</h3>
+                        <p class="percentage">3.7/4.0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Completed Credits</h3>
+                        <p>45/120</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Assignments</h3>
+                        <p>12/15 Completed</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Projects</h3>
+                        <p>3/4 Completed</p>
+                    </div>
+                </div>
+
+                <div class="report-charts">
+                    <div class="chart-container">
+                        <h2>Subject Performance</h2>
+                        <canvas id="subjectPerformanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>GPA Trend</h2>
+                        <canvas id="gpaTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="report-table">
+                    <h2>Recent Test Results</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Test Type</th>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Class Average</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Data Sturture</td>
+                                <td>Quiz</td>
+                                <td>10 May 2023</td>
+                                <td>85%</td>
+                                <td>72%</td>
+                            </tr>
+                            <tr>
+                                <td>DBMS</td>
+                                <td>Mid-term</td>
+                                <td>5 May 2023</td>
+                                <td>78%</td>
+                                <td>68%</td>
+                            </tr>
+                            <tr>
+                                <td>WDT</td>
+                                <td>Lab Report</td>
+                                <td>2 May 2023</td>
+                                <td>92%</td>
+                                <td>75%</td>
+                            </tr>
+                            <tr>
+                                <td>Biology</td>
+                                <td>Assignment</td>
+                                <td>28 Apr 2023</td>
+                                <td>88%</td>
+                                <td>80%</td>
+                            </tr>
+                            <tr>
+                                <td>English</td>
+                                <td>Essay</td>
+                                <td>25 Apr 2023</td>
+                                <td>75%</td>
+                                <td>70%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="defaulters">
+                <h1>Attendance Defaulters</h1>
+                
+                <div class="defaulter-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>
+                        <h3>Attendance Warning</h3>
+                        <p>Your attendance in Data Structure is below the required threshold (75%). Please improve your attendance to avoid academic penalties.</p>
+                    </div>
+                </div>
+
+                <div class="defaulter-subjects">
+                    <div class="subject-card warning">
+                        <h3>Data Sturture</h3>
+                        <p class="percentage">68%</p>
+                        <p class="required">Required: 75%</p>
+                        <p class="shortage">7% below requirement</p>
+                        <button class="action-btn">Request Consideration</button>
+                    </div>
+                    <div class="subject-card good">
+                        <h3>DBMS</h3>
+                        <p class="percentage">92%</p>
+                        <p class="required">Required: 75%</p>
+                        <p class="surplus">17% above requirement</p>
+                    </div>
+                    <div class="subject-card good">
+                        <h3>Chemistry</h3>
+                        <p class="percentage">85%</p>
+                        <p class="required">Required: 75%</p>
+                        <p class="surplus">10% above requirement</p>
+                    </div>
+                    <div class="subject-card good">
+                        <h3>Biology</h3>
+                        <p class="percentage">88%</p>
+                        <p class="required">Required: 75%</p>
+                        <p class="surplus">13% above requirement</p>
+                    </div>
+                </div>
+
+                <div class="defaulter-history">
+                    <h2>Attendance Improvement Plan</h2>
+                    <div class="improvement-plan">
+                        <div class="plan-item">
+                            <h3>Current Status</h3>
+                            <p>Your Data Structure attendance is 68%, which is 7% below the required 75%.</p>
+                        </div>
+                        <div class="plan-item">
+                            <h3>Required Improvement</h3>
+                            <p>You need to attend at least 8 consecutive Data Structure classes to reach the minimum requirement.</p>
+                        </div>
+                        <div class="plan-item">
+                            <h3>Consequences</h3>
+                            <p>Failure to meet the attendance requirement may result in being barred from the final examination.</p>
+                        </div>
+                        <div class="plan-item">
+                            <h3>Support Available</h3>
+                            <p>Contact your academic advisor for assistance or to discuss any issues affecting your attendance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="notes">
+                <h1>Notes & Reminders</h1>
+                
+                <div class="notes-container">
+                    <div class="notes-sidebar">
+                        <div class="notes-header">
+                            <h3>My Notes</h3>
+                            <button id="addNoteBtn"><i class="fas fa-plus"></i> New Note</button>
+                        </div>
+                        <div class="notes-list">
+                            <div class="note-item active">
+                                <h4>Physics Assignment</h4>
+                                <p>Due: May 20, 2023</p>
+                            </div>
+                            <div class="note-item">
+                                <h4>Math Formulas</h4>
+                                <p>Updated: May 15, 2023</p>
+                            </div>
+                            <div class="note-item">
+                                <h4>Chemistry Lab Report</h4>
+                                <p>Due: May 25, 2023</p>
+                            </div>
+                            <div class="note-item">
+                                <h4>Study Schedule</h4>
+                                <p>Updated: May 10, 2023</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="note-editor">
+                        <div class="editor-header">
+                            <input type="text" value="Physics Assignment" placeholder="Note Title">
+                            <div class="editor-actions">
+                                <button><i class="fas fa-save"></i> Save</button>
+                                <button><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                        <textarea placeholder="Write your note here...">Complete the following problems:
+1. Calculate the time complexity for merge sort algorithm.
+2. Implement a binary search tree with insertion and deletion operations.
+3. Explain the difference between stack and queue data structures.
+
+Remember to show all work and include proper implementations.
+
+Due Date: May 20, 2023
+Submission: Online portal</textarea>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

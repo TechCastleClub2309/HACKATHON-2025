@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        :root {
+            /* Dark theme variables (default) */
+            --bg-color: #0a0a0a;
+            --bg-gradient: linear-gradient(to bottom right, #000000, #111827, #000000);
+            --container-bg: rgba(255, 255, 255, 0.05);
+            --container-border: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --label-color: #e5e7eb;
+            --tab-inactive-bg: rgba(255, 255, 255, 0.03);
+            --tab-inactive-text: #d1d5db;
+            --tab-hover-bg: rgba(255, 255, 255, 0.1);
+            --tab-active-bg: linear-gradient(to bottom right, #1e40af, #3b82f6);
+            --tab-active-border: #3b82f6;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-text: #ffffff;
+            --input-border: rgba(255, 255, 255, 0.2);
+            --input-focus-border: #3b82f6;
+            --button-bg: linear-gradient(to right, #1e40af, #2563eb);
+            --button-hover-bg: linear-gradient(to right, #2563eb, #60a5fa);
+            --link-color: #d1d5db;
+            --link-hover-color: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Light theme variables */
+        [data-theme="light"] {
+            --bg-color: #f5f5f5;
+            --bg-gradient: linear-gradient(to bottom right, #ffffff, #e5e7eb, #ffffff);
+            --container-bg: rgba(255, 255, 255, 0.9);
+            --container-border: rgba(0, 0, 0, 0.1);
+            --text-color: #1f2937;
+            --label-color: #374151;
+            --tab-inactive-bg: #e5e7eb;
+            --tab-inactive-text: #4b5563;
+            --tab-hover-bg: #d1d5db;
+            --tab-active-bg: linear-gradient(to bottom right, #1e40af, #3b82f6);
+            --tab-active-border: #3b82f6;
+            --input-bg: #ffffff;
+            --input-text: #1f2937;
+            --input-border: rgba(0, 0, 0, 0.2);
+            --input-focus-border: #3b82f6;
+            --button-bg: linear-gradient(to right, #1e40af, #2563eb);
+            --button-hover-bg: linear-gradient(to right, #2563eb, #60a5fa);
+            --link-color: #4b5563;
+            --link-hover-color: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
+            transition: background-color 0.3s ease, background-image 0.3s ease;
+        }
+
+        .login-container {
+            position: relative;
+            background: var(--container-bg);
+            border-radius: 1rem;
+            box-shadow: 0 12px 24px var(--shadow-color);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 32rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--container-border);
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--tab-hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            height: 4rem;
+        }
+
+        .title {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 0 1px 3px var(--shadow-color);
+            transition: color 0.3s ease;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            gap: 0.75rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: var(--tab-inactive-text);
+            background-color: var(--tab-inactive-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--input-border);
+            box-shadow: 0 6px 12px var(--shadow-color);
+            text-shadow: 0 1px 3px var(--shadow-color);
+        }
+
+        .tab-button:hover {
+            background-color: var(--tab-hover-bg);
+            transform: translateY(-2px);
+            border-color: var(--input-focus-border);
+        }
+
+        .tab-button.active {
+            background-image: var(--tab-active-bg);
+            color: #ffffff;
+            border-color: var(--tab-active-border);
+            box-shadow: 0 8px 16px var(--shadow-color);
+            transform: translateY(-4px);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--label-color);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px var(--shadow-color);
+            transition: color 0.3s ease;
+        }
+
+        .input-field {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--input-border);
+            width: 100%;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            box-shadow: inset 0 2px 4px var(--shadow-color);
+        }
+
+        .input-field:focus {
+            border-color: var(--input-focus-border);
+            box-shadow: 0 6px 12px var(--shadow-color);
+            transform: translateY(-2px);
+        }
+
+        .login-button {
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-image: var(--button-bg);
+            transition: all 0.3s ease;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 12px var(--shadow-color);
+            text-shadow: 0 1px 3px var(--shadow-color);
+        }
+
+        .login-button:hover {
+            background-image: var(--button-hover-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px var(--shadow-color);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 6px var(--shadow-color);
+        }
+
+        .admin-login-link {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--link-color);
+            transition: color 0.3s ease;
+            text-shadow: 0 1px 2px var(--shadow-color);
+        }
+
+        .admin-login-link:hover {
+            color: var(--link-hover-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .form-group.admin-code-group {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
+        <div class="logo-container">
+        </div>
+        <h2 class="title">AttendanceOS Login</h2>
+        <div class="tab-buttons">
+            <button class="tab-button student-tab active" data-user-type="student">Student</button>
+            <button class="tab-button teacher-tab" data-user-type="teacher">Teacher</button>
+            <button class="tab-button admin-tab" data-user-type="admin">Admin</button>
+        </div>
+        <form class="space-y-4" id="login-form">
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" class="input-field">
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" class="input-field">
+            </div>
+            <div class="form-group admin-code-group">
+                <label for="adminCode" class="form-label">Admin Code</label>
+                <input type="text" id="adminCode" name="adminCode" placeholder="Enter admin authorization code" class="input-field">
+            </div>
+            <button type="submit" class="login-button">Login</button>
+        </form>
+        <div class="admin-login-link">
+            <a href="#">Admin Login</a>
+        </div>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const loginForm = document.getElementById('login-form');
+        const adminCodeGroup = document.querySelector('.admin-code-group');
+        const adminTabButton = document.querySelector('.admin-tab');
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        let activeTab = 'student';
+        let isDarkTheme = true;
+
+        // Tab switching logic
+        tabButtons.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabButtons.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                activeTab = this.dataset.userType;
+
+                if (activeTab === 'admin') {
+                    adminCodeGroup.style.display = 'block';
+                } else {
+                    adminCodeGroup.style.display = 'none';
+                }
+            });
+        });
+
+        // Form submission logic
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const username = event.target.username.value;
+            const password = event.target.password.value;
+            const adminCode = event.target.adminCode ? event.target.adminCode.value : '';
+
+            if (activeTab === 'admin') {
+                if (!adminCode) {
+                    alert('Please enter the admin code.');
+                    return;
+                }
+            }
+
+            console.log('Logging in as:', activeTab);
+            console.log('Username:', username);
+            console.log('Password:', password);
+            if (activeTab === 'admin') {
+                console.log('Admin code:', adminCode);
+            }
+
+            alert('Logged in as ' + activeTab + '!');
+            
+            // Redirect based on user type
+            if (activeTab === 'teacher') {
+                window.location.href = 'teacher.html';
+            } else if (activeTab === 'student') {
+                window.location.href = 'index.html';
+            } else {
+                window.location.href = 'admin.html';
+            }
+        });
+
+        // Redundant admin tab listener (kept for consistency with original)
+        adminTabButton.addEventListener('click', () => {
+            adminCodeGroup.style.display = 'block';
+        });
+
+        // Theme toggle logic
+        themeToggle.addEventListener('click', () => {
+            if (isDarkTheme) {
+                body.setAttribute('data-theme', 'light');
+                themeToggle.textContent = 'Dark Theme';
+            } else {
+                body.removeAttribute('data-theme');
+                themeToggle.textContent = 'Light Theme';
+            }
+            isDarkTheme = !isDarkTheme;
+        });
+    </script>
+</body>
+</html>
