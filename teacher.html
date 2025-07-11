@@ -4,152 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4361ee',
+                        secondary: '#3f37c9',
+                        success: '#38b000',
+                        warning: '#ff9e00',
+                        danger: '#e63946',
+                        info: '#4cc9f0',
+                        light: '#f8f9fa',
+                        dark: '#212529',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --warning: #f72585;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --light-gray: #e9ecef;
-            --border: #dee2e6;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
+        .status-present { background-color: rgba(76, 201, 240, 0.1); }
+        .status-absent { background-color: rgba(247, 37, 133, 0.1); }
+        .status-late { background-color: rgba(255, 193, 7, 0.1); }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
-        }
-        
-        /* Header Styles */
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 20px;
-            border-radius: 10px 10px 0 0;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-        
-        .header-left h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .header-left p {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .user-info {
-            text-align: right;
-        }
-        
-        .user-info h3 {
-            font-size: 1.1rem;
-            margin-bottom: 3px;
-        }
-        
-        .user-info p {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-        
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        /* Tabs Navigation */
-        .tabs {
-            display: flex;
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-        
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--gray);
-            transition: var(--transition);
-            position: relative;
-        }
-        
-        .tab-btn:hover {
-            color: var(--primary);
-        }
-        
-        .tab-btn.active {
-            color: var(--primary);
-        }
-        
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--primary);
-        }
-        
-        /* Main Content */
-        .tab-content {
-            display: none;
-            background-color: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
-        }
-        
-        .tab-content.active {
-            display: block;
+        .fade-in {
             animation: fadeIn 0.3s ease;
         }
         
@@ -158,375 +39,136 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .section-header h2 {
-            font-size: 1.5rem;
-            color: var(--dark);
-            font-weight: 600;
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-        }
-        
-        .btn i {
-            font-size: 0.9rem;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary);
-        }
-        
-        .btn-success {
-            background-color: #38b000;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background-color: #2d8c00;
-        }
-        
-        .btn-warning {
-            background-color: #ff9e00;
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background-color: #e68a00;
-        }
-        
-        .btn-danger {
-            background-color: #e63946;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #d00000;
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .form-control {
-            flex: 1;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        input[type="text"],
-        input[type="date"],
-        input[type="file"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-        
-        input[type="text"]:focus,
-        input[type="date"]:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-        
-        /* Table Styles */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-        
-        thead {
-            background-color: var(--light);
-        }
-        
-        th, td {
-            padding: 14px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        th {
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        tbody tr {
-            transition: var(--transition);
-        }
-        
-        tbody tr:hover {
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-        
-        .action-cell {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .status-present {
-            background-color: rgba(76, 201, 240, 0.1);
-        }
-        
-        .status-absent {
-            background-color: rgba(247, 37, 133, 0.1);
-        }
-        
-        .status-late {
-            background-color: rgba(255, 193, 7, 0.1);
-        }
-        
-        .attendance-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .chart-container {
+            background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+            border-radius: 0.75rem;
         }
         
         .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
+            transition: transform 0.3s ease;
         }
         
-        .stat-icon.present {
-            background-color: #4cc9f0;
+        .stat-icon:hover {
+            transform: scale(1.05);
         }
         
-        .stat-icon.absent {
-            background-color: #f72585;
+        .attendance-select {
+            background-color: transparent;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s ease;
         }
         
-        .stat-icon.late {
-            background-color: #ff9e00;
+        .attendance-select:focus {
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
         
-        .stat-icon.total {
-            background-color: #4361ee;
+        .attendance-input {
+            background-color: transparent;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s ease;
         }
         
-        .stat-content h3 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            color: var(--dark);
-        }
-        
-        .stat-content p {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-        
-        /* Footer */
-        .dashboard-footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--gray);
-            font-size: 0.9rem;
-            margin-top: 30px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
-            .header-right {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .user-info {
-                text-align: center;
-            }
-            
-            .tabs {
-                flex-wrap: wrap;
-            }
-            
-            .tab-btn {
-                flex: 1 0 33%;
-            }
-            
-            .btn-group {
-                flex-wrap: wrap;
-            }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .attendance-controls {
-                flex-direction: column;
-            }
+        .attendance-input:focus {
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-8">
         <!-- Dashboard Header -->
-        <header class="dashboard-header">
-            <div class="header-left">
-                <h1>Teacher Dashboard</h1>
-                <p>Manage students, track attendance, and generate reports</p>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <h3>Dr. Sarah Johnson</h3>
-                    <p>Computer Science Department</p>
+        <header class="bg-gradient-to-r from-primary to-secondary text-white rounded-t-xl shadow-lg p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <h1 class="text-2xl md:text-3xl font-bold">Teacher Dashboard</h1>
+                    <p class="text-blue-100 mt-1">Manage students, track attendance, and generate reports</p>
                 </div>
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <h3 class="font-semibold">Dr. Sarah Johnson</h3>
+                        <p class="text-blue-100 text-sm">Computer Science Department</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary text-xl font-bold">
+                        <i class="fas fa-user"></i>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- Tabs Navigation -->
-        <nav class="tabs">
-            <button class="tab-btn active" onclick="showTab('students')">
-                <i class="fas fa-users"></i> Students
-            </button>
-            <button class="tab-btn" onclick="showTab('daily-attendance')">
-                <i class="fas fa-calendar-day"></i> Daily Attendance
-            </button>
-            <button class="tab-btn" onclick="showTab('monthly-report')">
-                <i class="fas fa-chart-bar"></i> Monthly Report
-            </button>
-            <button class="tab-btn" onclick="showTab('analytics')">
-                <i class="fas fa-chart-pie"></i> Analytics
-            </button>
+        <nav class="bg-white rounded-lg shadow mb-6 overflow-hidden">
+            <div class="flex flex-wrap">
+                <button class="tab-btn flex-1 py-4 px-2 text-center font-medium text-gray-500 hover:text-primary transition-colors relative" onclick="showTab('students')">
+                    <i class="fas fa-users mr-2"></i>Students
+                </button>
+                <button class="tab-btn flex-1 py-4 px-2 text-center font-medium text-gray-500 hover:text-primary transition-colors" onclick="showTab('daily-attendance')">
+                    <i class="fas fa-calendar-day mr-2"></i>Daily Attendance
+                </button>
+                <button class="tab-btn flex-1 py-4 px-2 text-center font-medium text-gray-500 hover:text-primary transition-colors" onclick="showTab('monthly-report')">
+                    <i class="fas fa-chart-bar mr-2"></i>Monthly Report
+                </button>
+                <button class="tab-btn flex-1 py-4 px-2 text-center font-medium text-gray-500 hover:text-primary transition-colors" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-pie mr-2"></i>Analytics
+                </button>
+            </div>
         </nav>
 
         <!-- Students Tab -->
-        <div id="students" class="tab-content active">
-            <div class="section-header">
-                <h2>Student Management</h2>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                        <i class="fas fa-file-import"></i> Import Excel
+        <div id="students" class="tab-content bg-white rounded-xl shadow-lg p-6 mb-8 fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 md:mb-0">Student Management</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button class="btn bg-info hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center" onclick="downloadSampleTemplate()">
+                        <i class="fas fa-download mr-2"></i>Download Template
                     </button>
-                    <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(this)">
-                    <button class="btn btn-success" onclick="exportToExcel()">
-                        <i class="fas fa-file-export"></i> Export to Excel
+                    <button class="btn bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg flex items-center" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-file-import mr-2"></i>Import Excel
                     </button>
-                    <button class="btn btn-warning" onclick="toggleAddForm()">
-                        <i class="fas fa-user-plus"></i> Add Student
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(this)">
+                    <button class="btn bg-success hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center" onclick="exportToExcel()">
+                        <i class="fas fa-file-export mr-2"></i>Export to Excel
+                    </button>
+                    <button class="btn bg-warning hover:bg-amber-600 text-white px-4 py-2 rounded-lg flex items-center" onclick="toggleAddForm()">
+                        <i class="fas fa-user-plus mr-2"></i>Add Student
                     </button>
                 </div>
             </div>
 
             <!-- Add Student Form -->
-            <div id="addStudentForm" style="display: none; margin-bottom: 25px; padding: 20px; background-color: var(--light); border-radius: 8px;">
-                <h3 style="margin-bottom: 15px;">Add New Student</h3>
-                <div class="form-row">
-                    <div class="form-control">
-                        <label for="rollNumber">Roll Number</label>
-                        <input type="text" id="rollNumber" placeholder="Enter roll number">
+            <div id="addStudentForm" class="hidden bg-gray-50 rounded-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800">Add New Student</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="rollNumber" class="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+                        <input type="text" id="rollNumber" placeholder="Enter roll number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                     </div>
-                    <div class="form-control">
-                        <label for="studentName">Student Name</label>
-                        <input type="text" id="studentName" placeholder="Enter student name">
+                    <div>
+                        <label for="studentName" class="block text-sm font-medium text-gray-700 mb-1">Student Name</label>
+                        <input type="text" id="studentName" placeholder="Enter student name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-control">
-                        <label for="studentClass">Class</label>
-                        <select id="studentClass">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="studentClass" class="block text-sm font-medium text-gray-700 mb-1">Class</label>
+                        <select id="studentClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                             <option value="BCA">BCA</option>
                             <option value="BSc">BSc Computer Science</option>
                             <option value="MCA">MCA</option>
                             <option value="MSc">MSc Computer Science</option>
                         </select>
                     </div>
-                    <div class="form-control">
-                        <label for="studentSection">Section</label>
-                        <select id="studentSection">
+                    <div>
+                        <label for="studentSection" class="block text-sm font-medium text-gray-700 mb-1">Section</label>
+                        <select id="studentSection" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                             <option value="Management">Management</option>
                             <option value="Science">Science</option>
                             <option value="Arts">Arts</option>
@@ -534,67 +176,68 @@
                         </select>
                     </div>
                 </div>
-                <div style="text-align: right; margin-top: 15px;">
-                    <button class="btn btn-outline" onclick="toggleAddForm()">Cancel</button>
-                    <button class="btn btn-success" onclick="addStudent()">Save Student</button>
+                <div class="flex justify-end space-x-3">
+                    <button class="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" onclick="toggleAddForm()">Cancel</button>
+                    <button class="px-4 py-2 bg-success text-white rounded-lg hover:bg-green-700 transition-colors" onclick="addStudent()">Save Student</button>
                 </div>
             </div>
 
-            <div class="table-container">
-                <table id="studentTable">
-                    <thead>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow">
+                <table id="studentTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Roll Number</th>
-                            <th>Student Name</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Join Date</th>
-                            <th>Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="studentTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td>BCA101</td>
-                            <td>John Smith</td>
-                            <td>BCA</td>
-                            <td>Management</td>
-                            <td>2023-08-15</td>
-                            <td class="action-cell">
-                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA101</td>
+                            <td class="px-6 py-4 whitespace-nowrap">John Smith</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Management</td>
+                            <td class="px-6 py-4 whitespace-nowrap">2023-08-15</td>
+                            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                <button class="text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         <tr>
-                            <td>BCA102</td>
-                            <td>Emma Johnson</td>
-                            <td>BCA</td>
-                            <td>Management</td>
-                            <td>2023-08-15</td>
-                            <td class="action-cell">
-                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA102</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Emma Johnson</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Management</td>
+                            <td class="px-6 py-4 whitespace-nowrap">2023-08-15</td>
+                            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                <button class="text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         <tr>
-                            <td>BCA103</td>
-                            <td>Michael Brown</td>
-                            <td>BCA</td>
-                            <td>Management</td>
-                            <td>2023-08-15</td>
-                            <td class="action-cell">
-                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>BCA104</td>
-                            <td>Sarah Williams</td>
-                            <td>BCA</td>
-                            <td>Management</td>
-                            <td>2023-08-15</td>
-                            <td class="action-cell">
-                                <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA103</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Michael Brown</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Management</td>
+                            <td class="px-6 py-4 whitespace-nowrap">2023-08-15</td>
+                            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                <button class="text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     </tbody>
@@ -603,27 +246,27 @@
         </div>
 
         <!-- Daily Attendance Tab -->
-        <div id="daily-attendance" class="tab-content">
-            <div class="section-header">
-                <h2>Daily Attendance Tracking</h2>
-                <div class="btn-group">
-                    <button class="btn btn-success" onclick="exportDailyAttendance()">
-                        <i class="fas fa-file-export"></i> Export Attendance
+        <div id="daily-attendance" class="tab-content bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 md:mb-0">Daily Attendance Tracking</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button class="btn bg-success hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center" onclick="exportDailyAttendance()">
+                        <i class="fas fa-file-export mr-2"></i>Export Attendance
                     </button>
-                    <button class="btn btn-primary" onclick="saveAttendance()">
-                        <i class="fas fa-save"></i> Save Attendance
+                    <button class="btn bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg flex items-center" onclick="saveAttendance()">
+                        <i class="fas fa-save mr-2"></i>Save Attendance
                     </button>
                 </div>
             </div>
             
-            <div class="attendance-controls">
-                <div class="form-control">
-                    <label for="attendanceDate">Date</label>
-                    <input type="date" id="attendanceDate" value="">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label for="attendanceDate" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="attendanceDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                 </div>
-                <div class="form-control">
-                    <label for="subjectSelect">Subject</label>
-                    <select id="subjectSelect">
+                <div>
+                    <label for="subjectSelect" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                    <select id="subjectSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                         <option value="">Select Subject</option>
                         <option value="Java">Java Programming</option>
                         <option value="Python">Python Programming</option>
@@ -632,79 +275,64 @@
                         <option value="Operating System">Operating System</option>
                     </select>
                 </div>
-                <div class="form-control">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-primary" onclick="loadAttendanceSheet()" style="margin-top: 7px;">
-                        <i class="fas fa-sync"></i> Load Students
+                <div class="flex items-end">
+                    <button class="btn bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg flex items-center w-full" onclick="loadAttendanceSheet()">
+                        <i class="fas fa-sync mr-2"></i>Load Students
                     </button>
                 </div>
             </div>
             
-            <div class="table-container">
-                <table id="attendanceTable">
-                    <thead>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow">
+                <table id="attendanceTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Roll Number</th>
-                            <th>Student Name</th>
-                            <th>Status</th>
-                            <th>Remarks</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white divide-y divide-gray-200">
                         <tr class="status-present">
-                            <td>BCA101</td>
-                            <td>John Smith</td>
-                            <td>
-                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <td class="px-6 py-4 whitespace-nowrap">BCA101</td>
+                            <td class="px-6 py-4 whitespace-nowrap">John Smith</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <select onchange="updateRowStatus(this)" class="attendance-select">
                                     <option value="Present" selected>Present</option>
                                     <option value="Absent">Absent</option>
                                     <option value="Late">Late</option>
                                 </select>
                             </td>
-                            <td>
-                                <input type="text" value="" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="text" value="" placeholder="Add remarks" class="attendance-input">
                             </td>
                         </tr>
                         <tr class="status-late">
-                            <td>BCA102</td>
-                            <td>Emma Johnson</td>
-                            <td>
-                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <td class="px-6 py-4 whitespace-nowrap">BCA102</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Emma Johnson</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <select onchange="updateRowStatus(this)" class="attendance-select">
                                     <option value="Present">Present</option>
                                     <option value="Absent">Absent</option>
                                     <option value="Late" selected>Late</option>
                                 </select>
                             </td>
-                            <td>
-                                <input type="text" value="Arrived 15 minutes late" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="text" value="Arrived 15 minutes late" placeholder="Add remarks" class="attendance-input">
                             </td>
                         </tr>
                         <tr class="status-absent">
-                            <td>BCA103</td>
-                            <td>Michael Brown</td>
-                            <td>
-                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <td class="px-6 py-4 whitespace-nowrap">BCA103</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Michael Brown</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <select onchange="updateRowStatus(this)" class="attendance-select">
                                     <option value="Present">Present</option>
                                     <option value="Absent" selected>Absent</option>
                                     <option value="Late">Late</option>
                                 </select>
                             </td>
-                            <td>
-                                <input type="text" value="Medical leave" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
-                            </td>
-                        </tr>
-                        <tr class="status-present">
-                            <td>BCA104</td>
-                            <td>Sarah Williams</td>
-                            <td>
-                                <select onchange="updateRowStatus(this)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
-                                    <option value="Present" selected>Present</option>
-                                    <option value="Absent">Absent</option>
-                                    <option value="Late">Late</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input type="text" value="" placeholder="Add remarks" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="text" value="Medical leave" placeholder="Add remarks" class="attendance-input">
                             </td>
                         </tr>
                     </tbody>
@@ -713,20 +341,20 @@
         </div>
 
         <!-- Monthly Report Tab -->
-        <div id="monthly-report" class="tab-content">
-            <div class="section-header">
-                <h2>Monthly Attendance Report</h2>
-                <div class="btn-group">
-                    <button class="btn btn-success" onclick="exportMonthlyReport()">
-                        <i class="fas fa-file-export"></i> Export Report
+        <div id="monthly-report" class="tab-content bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 md:mb-0">Monthly Attendance Report</h2>
+                <div class="flex">
+                    <button class="btn bg-success hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center" onclick="exportMonthlyReport()">
+                        <i class="fas fa-file-export mr-2"></i>Export Report
                     </button>
                 </div>
             </div>
             
-            <div class="attendance-controls">
-                <div class="form-control">
-                    <label for="monthPicker">Month</label>
-                    <select id="monthPicker" onchange="generateMonthlyReport()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label for="monthPicker" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                    <select id="monthPicker" onchange="generateMonthlyReport()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                         <option value="2023-01">January 2023</option>
                         <option value="2023-02">February 2023</option>
                         <option value="2023-03">March 2023</option>
@@ -741,9 +369,9 @@
                         <option value="2023-12">December 2023</option>
                     </select>
                 </div>
-                <div class="form-control">
-                    <label for="monthlySubjectSelect">Subject</label>
-                    <select id="monthlySubjectSelect" onchange="generateMonthlyReport()">
+                <div>
+                    <label for="monthlySubjectSelect" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                    <select id="monthlySubjectSelect" onchange="generateMonthlyReport()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                         <option value="">All Subjects</option>
                         <option value="Java">Java Programming</option>
                         <option value="Python">Python Programming</option>
@@ -754,55 +382,46 @@
                 </div>
             </div>
             
-            <div class="table-container">
-                <table id="monthlyReportTable">
-                    <thead>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow">
+                <table id="monthlyReportTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Roll Number</th>
-                            <th>Student Name</th>
-                            <th>Total Classes</th>
-                            <th>Present</th>
-                            <th>Absent</th>
-                            <th>Late</th>
-                            <th>Attendance %</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Classes</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Present</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Absent</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Late</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance %</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td>BCA101</td>
-                            <td>John Smith</td>
-                            <td>18</td>
-                            <td>16</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>88.9%</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA101</td>
+                            <td class="px-6 py-4 whitespace-nowrap">John Smith</td>
+                            <td class="px-6 py-4 whitespace-nowrap">18</td>
+                            <td class="px-6 py-4 whitespace-nowrap">16</td>
+                            <td class="px-6 py-4 whitespace-nowrap">1</td>
+                            <td class="px-6 py-4 whitespace-nowrap">1</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium">88.9%</td>
                         </tr>
                         <tr>
-                            <td>BCA102</td>
-                            <td>Emma Johnson</td>
-                            <td>18</td>
-                            <td>17</td>
-                            <td>0</td>
-                            <td>1</td>
-                            <td>94.4%</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA102</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Emma Johnson</td>
+                            <td class="px-6 py-4 whitespace-nowrap">18</td>
+                            <td class="px-6 py-4 whitespace-nowrap">17</td>
+                            <td class="px-6 py-4 whitespace-nowrap">0</td>
+                            <td class="px-6 py-4 whitespace-nowrap">1</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium">94.4%</td>
                         </tr>
                         <tr>
-                            <td>BCA103</td>
-                            <td>Michael Brown</td>
-                            <td>18</td>
-                            <td>15</td>
-                            <td>3</td>
-                            <td>0</td>
-                            <td>83.3%</td>
-                        </tr>
-                        <tr>
-                            <td>BCA104</td>
-                            <td>Sarah Williams</td>
-                            <td>18</td>
-                            <td>18</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>100.0%</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BCA103</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Michael Brown</td>
+                            <td class="px-6 py-4 whitespace-nowrap">18</td>
+                            <td class="px-6 py-4 whitespace-nowrap">15</td>
+                            <td class="px-6 py-4 whitespace-nowrap">3</td>
+                            <td class="px-6 py-4 whitespace-nowrap">0</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium">83.3%</td>
                         </tr>
                     </tbody>
                 </table>
@@ -810,68 +429,75 @@
         </div>
 
         <!-- Analytics Tab -->
-        <div id="analytics" class="tab-content">
-            <div class="section-header">
-                <h2>Attendance Analytics</h2>
-                <div class="btn-group">
-                    <button class="btn btn-success">
-                        <i class="fas fa-download"></i> Download Report
+        <div id="analytics" class="tab-content bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 md:mb-0">Attendance Analytics</h2>
+                <div class="flex">
+                    <button class="btn bg-success hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
+                        <i class="fas fa-download mr-2"></i>Download Report
                     </button>
                 </div>
             </div>
             
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-icon total">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="stat-card bg-white rounded-xl shadow p-6 flex items-center">
+                    <div class="stat-icon w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>42</h3>
-                        <p>Total Students</p>
+                    <div class="ml-4">
+                        <h3 class="text-3xl font-bold">42</h3>
+                        <p class="text-gray-600">Total Students</p>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon present">
+                <div class="stat-card bg-white rounded-xl shadow p-6 flex items-center">
+                    <div class="stat-icon w-16 h-16 rounded-full bg-info flex items-center justify-center text-white text-2xl">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>78.3%</h3>
-                        <p>Average Attendance</p>
+                    <div class="ml-4">
+                        <h3 class="text-3xl font-bold">78.3%</h3>
+                        <p class="text-gray-600">Average Attendance</p>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon absent">
+                <div class="stat-card bg-white rounded-xl shadow p-6 flex items-center">
+                    <div class="stat-icon w-16 h-16 rounded-full bg-danger flex items-center justify-center text-white text-2xl">
                         <i class="fas fa-times-circle"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>12</h3>
-                        <p>Most Absent Student</p>
+                    <div class="ml-4">
+                        <h3 class="text-3xl font-bold">12</h3>
+                        <p class="text-gray-600">Most Absent Student</p>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon late">
+                <div class="stat-card bg-white rounded-xl shadow p-6 flex items-center">
+                    <div class="stat-icon w-16 h-16 rounded-full bg-warning flex items-center justify-center text-white text-2xl">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>24</h3>
-                        <p>Late Arrivals (This Month)</p>
+                    <div class="ml-4">
+                        <h3 class="text-3xl font-bold">24</h3>
+                        <p class="text-gray-600">Late Arrivals (This Month)</p>
                     </div>
                 </div>
             </div>
             
-            <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: var(--shadow);">
-                <h3 style="margin-bottom: 20px;">Attendance Trends</h3>
-                <div style="height: 300px; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
-                    [Attendance Chart Visualization]
+            <div class="bg-white rounded-xl shadow p-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800">Attendance Trends</h3>
+                <div class="chart-container h-64 rounded-lg flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg mr-3"></div>
+                            <div class="w-12 h-12 bg-green-500 rounded-lg mr-3"></div>
+                            <div class="w-12 h-12 bg-yellow-500 rounded-lg"></div>
+                        </div>
+                        <p class="text-gray-600">Attendance visualization chart showing trends over time</p>
+                    </div>
                 </div>
             </div>
         </div>
         
         <!-- Dashboard Footer -->
-        <footer class="dashboard-footer">
+        <footer class="text-center py-6 text-gray-500 text-sm">
             <p>Teacher Dashboard &copy; 2023 | Computer Science Department</p>
         </footer>
     </div>
@@ -884,23 +510,32 @@
         function showTab(tabId) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
+                tab.classList.add('hidden');
             });
             
             // Remove active class from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-gray-500');
             });
             
             // Show selected tab and set button active
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('fade-in');
+            
+            // Find the button that corresponds to this tab and activate it
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.remove('text-gray-500');
+                    btn.classList.add('bg-primary', 'text-white');
+                }
+            });
         }
         
         // Toggle add student form
         function toggleAddForm() {
             const form = document.getElementById('addStudentForm');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            form.classList.toggle('hidden');
         }
         
         // Add new student
@@ -915,19 +550,23 @@
                 return;
             }
             
-            const table = document.querySelector('#studentTable tbody');
-            const newRow = document.createElement('tr');
+            const table = document.querySelector('#studentTableBody');
             const today = new Date().toISOString().split('T')[0];
             
+            const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                <td>${rollNumber}</td>
-                <td>${studentName}</td>
-                <td>${studentClass}</td>
-                <td>${studentSection}</td>
-                <td>${today}</td>
-                <td class="action-cell">
-                    <button class="btn btn-outline"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                <td class="px-6 py-4 whitespace-nowrap">${rollNumber}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${studentName}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${studentClass}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${studentSection}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${today}</td>
+                <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                    <button class="text-blue-500 hover:text-blue-700">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             `;
             
@@ -938,7 +577,8 @@
             document.getElementById('studentName').value = '';
             toggleAddForm();
             
-            alert('Student added successfully!');
+            // Show success notification
+            showNotification('Student added successfully!', 'success');
         }
         
         // Update row status in attendance
@@ -965,36 +605,186 @@
             const subject = document.getElementById('subjectSelect').value;
             
             if (!date) {
-                alert('Please select a date');
+                showNotification('Please select a date', 'warning');
                 return;
             }
             
             if (!subject) {
-                alert('Please select a subject');
+                showNotification('Please select a subject', 'warning');
                 return;
             }
             
-            alert(`Loading attendance sheet for ${date} - ${subject}`);
+            showNotification(`Attendance sheet loaded for ${date} - ${subject}`, 'success');
         }
         
         // Save attendance
         function saveAttendance() {
-            alert('Attendance saved successfully!');
+            showNotification('Attendance saved successfully!', 'success');
         }
         
         // Export to Excel
         function exportToExcel() {
-            alert('Exporting student data to Excel...');
+            // Create a sample workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.table_to_sheet(document.getElementById('studentTable'));
+            XLSX.utils.book_append_sheet(wb, ws, "Students");
+            
+            // Export the file
+            XLSX.writeFile(wb, "students.xlsx");
+            showNotification('Student data exported to Excel!', 'success');
+        }
+        
+        // Import from Excel
+        function downloadSampleTemplate() {
+            const template = [
+                ['Roll Number', 'Student Name', 'Class', 'Section', 'Join Date'],
+                ['BCA101', 'John Doe', 'BCA', 'Management', '2023-09-01'],
+                ['BCA102', 'Jane Smith', 'BCA', 'Science', '2023-09-01']
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(template);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Students');
+            XLSX.writeFile(wb, 'student_template.xlsx');
+        }
+
+        function validateExcelData(data) {
+            const errors = [];
+            data.forEach((row, index) => {
+                if (!row['Roll Number']) errors.push(`Row ${index + 1}: Missing Roll Number`);
+                if (!row['Student Name']) errors.push(`Row ${index + 1}: Missing Student Name`);
+                if (row['Class'] && !['BCA', 'BSc', 'MCA', 'MSc'].includes(row['Class'])) {
+                    errors.push(`Row ${index + 1}: Invalid Class. Must be BCA, BSc, MCA, or MSc`);
+                }
+                if (row['Section'] && !['Management', 'Science', 'Arts', 'Commerce'].includes(row['Section'])) {
+                    errors.push(`Row ${index + 1}: Invalid Section. Must be Management, Science, Arts, or Commerce`);
+                }
+                if (row['Join Date'] && !/^\d{4}-\d{2}-\d{2}$/.test(row['Join Date'])) {
+                    errors.push(`Row ${index + 1}: Invalid Date Format. Use YYYY-MM-DD`);
+                }
+            });
+            return errors;
+        }
+
+        function importFromExcel(input) {
+            const importBtn = document.querySelector('.btn:has(.fa-file-import)');
+            const originalBtnHtml = importBtn.innerHTML;
+
+            if (!input.files || !input.files[0]) {
+                showNotification('Please select an Excel file to import', 'warning');
+                return;
+            }
+
+            // Show loading state
+            importBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Importing...';
+            importBtn.disabled = true;
+
+            const file = input.files[0];
+            if (!file.name.match(/\.(xlsx|xls)$/)) {
+                showNotification('Please select a valid Excel file (.xlsx or .xls)', 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, {type: 'binary'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: ['Roll Number', 'Student Name', 'Class', 'Section', 'Join Date']});
+                    
+                    // Remove header row if exists
+                    if (jsonData.length > 0 && jsonData[0]['Roll Number'] === 'Roll Number') {
+                        jsonData.shift();
+                    }
+                    
+                    if (!jsonData.length) {
+                        showNotification('The Excel file appears to be empty', 'warning');
+                        return;
+                    }
+
+                    // Validate data
+                    const errors = validateExcelData(jsonData);
+                    if (errors.length > 0) {
+                        const errorMessage = 'Data validation failed:\n' + errors.join('\n');
+                        console.error(errorMessage);
+                        showNotification('Import failed. Check console for details.', 'error');
+                        return;
+                    }
+
+                    const tableBody = document.getElementById('studentTableBody');
+                    tableBody.innerHTML = '';
+                    
+                    jsonData.forEach(row => {
+                        if (row['Roll Number'] && row['Student Name']) {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap">${row['Roll Number']}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${row['Student Name']}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${row['Class'] || 'BCA'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${row['Section'] || 'Management'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${row['Join Date'] || new Date().toISOString().split('T')[0]}</td>
+                                <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                    <button class="text-blue-500 hover:text-blue-700" onclick="editStudent(this)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700" onclick="deleteStudent(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            tableBody.appendChild(tr);
+                        }
+                    });
+                    showNotification(`${jsonData.length} students imported successfully!`, 'success');
+                     // Reset button state
+                     importBtn.innerHTML = originalBtnHtml;
+                     importBtn.disabled = false;
+                     // Clear the file input
+                     input.value = '';
+                } catch (error) {
+                    console.error('Error importing Excel file:', error);
+                    showNotification('Error importing Excel file. Please check the file format and try again.', 'error');
+                     // Reset button state on error
+                     importBtn.innerHTML = originalBtnHtml;
+                     importBtn.disabled = false;
+                     // Clear the file input
+                     input.value = '';
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error reading the Excel file', 'error');
+            };
+            
+            reader.readAsBinaryString(file);
         }
         
         // Export daily attendance
         function exportDailyAttendance() {
-            alert('Exporting daily attendance to Excel...');
+            // Create a sample workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.table_to_sheet(document.getElementById('attendanceTable'));
+            XLSX.utils.book_append_sheet(wb, ws, "Daily Attendance");
+            
+            // Export the file
+            const date = document.getElementById('attendanceDate').value || 'attendance';
+            XLSX.writeFile(wb, `daily-attendance-${date}.xlsx`);
+            showNotification('Daily attendance exported to Excel!', 'success');
         }
         
         // Export monthly report
         function exportMonthlyReport() {
-            alert('Exporting monthly report to Excel...');
+            // Create a sample workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.table_to_sheet(document.getElementById('monthlyReportTable'));
+            XLSX.utils.book_append_sheet(wb, ws, "Monthly Report");
+            
+            // Export the file
+            const month = document.getElementById('monthPicker').value || 'report';
+            XLSX.writeFile(wb, `monthly-report-${month}.xlsx`);
+            showNotification('Monthly report exported to Excel!', 'success');
         }
         
         // Generate monthly report
@@ -1002,8 +792,20 @@
             const month = document.getElementById('monthPicker').value;
             const subject = document.getElementById('monthlySubjectSelect').value;
             
-            alert(`Generating report for ${month} - ${subject || 'All Subjects'}`);
+            showNotification(`Report generated for ${month} - ${subject || 'All Subjects'}`, 'success');
         }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // In a real application, you would use a proper notification system
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+        
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set active tab
+            document.querySelector('.tab-btn').classList.add('bg-primary', 'text-white');
+        });
     </script>
 </body>
 </html>

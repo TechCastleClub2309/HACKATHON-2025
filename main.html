@@ -1,0 +1,853 @@
+<!--
+    i changed index.html into main.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4361ee',
+                        secondary: '#3f37c9',
+                        accent: '#4895ef',
+                        success: '#4caf50',
+                        warning: '#ff9800',
+                        danger: '#f44336',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .improvement-plan {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .plan-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .note-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .note-card.active {
+            border: 2px solid #4361ee;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex min-h-screen">
+        <nav class="w-64 bg-primary text-white p-5 flex flex-col">
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold">Student Portal</h2>
+            </div>
+            <ul class="space-y-2 mb-auto">
+                <li class="flex items-center p-3 rounded-lg sidebar-item active cursor-pointer transition-colors duration-200" data-tab="dashboard"><i class="fas fa-home mr-3 text-lg"></i> Dashboard</li>
+                <li class="flex items-center p-3 rounded-lg sidebar-item hover:bg-secondary cursor-pointer transition-colors duration-200" data-tab="attendance"><i class="fas fa-calendar-check mr-3 text-lg"></i> Attendance</li>
+                <li class="flex items-center p-3 rounded-lg sidebar-item hover:bg-secondary cursor-pointer transition-colors duration-200" data-tab="reports"><i class="fas fa-chart-bar mr-3 text-lg"></i> Reports</li>
+                <li class="flex items-center p-3 rounded-lg sidebar-item hover:bg-secondary cursor-pointer transition-colors duration-200" data-tab="defaulters"><i class="fas fa-exclamation-triangle mr-3 text-lg"></i> Defaulters</li>
+                <li class="flex items-center p-3 rounded-lg sidebar-item hover:bg-secondary cursor-pointer transition-colors duration-200" data-tab="notes"><i class="fas fa-sticky-note mr-3 text-lg"></i> Notes</li>
+            </ul>
+            <div class="flex items-center pt-4 border-t border-white/10">
+                <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="User" class="w-10 h-10 rounded-full mr-3">
+                <div>
+                    <h4 class="text-sm font-semibold">John Doe</h4>
+                    <p class="text-xs opacity-80">Student ID: S12345</p>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-1 p-5 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+                <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm w-72">
+                    <i class="fas fa-search text-gray-400 mr-3"></i>
+                    <input type="text" placeholder="Search..." class="w-full outline-none text-gray-600" id="searchInput">
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="relative cursor-pointer">
+                        <i class="fas fa-bell text-gray-600 text-xl" id="notificationsIcon"></i>
+                        <span class="absolute -top-1 -right-1 bg-danger text-white text-xs w-5 h-5 flex items-center justify-center rounded-full" id="notificationBadge">3</span>
+                    </div>
+                    <div class="cursor-pointer">
+                        <i class="fas fa-cog text-gray-600 text-xl hover:text-primary transition-colors duration-200" id="settingsIcon"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="tab-content active" id="dashboard">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center mr-4">
+                            <i class="fas fa-calendar-check text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium mb-1">Attendance</h3>
+                            <p class="text-2xl font-bold text-primary">85%</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-success flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-line text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium mb-1">Performance</h3>
+                            <p class="text-2xl font-bold text-success">78%</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-warning flex items-center justify-center mr-4">
+                            <i class="fas fa-tasks text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium mb-1">Assignments</h3>
+                            <p class="text-2xl font-bold text-warning">12/15</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-danger flex items-center justify-center mr-4">
+                            <i class="fas fa-file-alt text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium mb-1">Upcoming Exams</h3>
+                            <p class="text-2xl font-bold text-danger">2</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Attendance Overview</h2>
+                        <div class="h-[300px]">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Performance Trend</h2>
+                        <div class="h-[300px]">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Recent Activities</h2>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <i class="fas fa-file-upload text-primary text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-medium text-gray-800 mb-1">Assignment Submitted</h4>
+                                <p class="text-gray-600 text-sm mb-1">You submitted Data Structure Assignment #5</p>
+                                <span class="text-xs text-gray-400">2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-success text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-medium text-gray-800 mb-1">Attendance Marked</h4>
+                                <p class="text-gray-600 text-sm mb-1">You were marked present for all classes today</p>
+                                <span class="text-xs text-gray-400">Yesterday</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                                <i class="fas fa-clipboard-check text-warning text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-medium text-gray-800 mb-1">Test Result</h4>
+                                <p class="text-gray-600 text-sm mb-1">You scored 85% in Mathematics Quiz</p>
+                                <span class="text-xs text-gray-400">2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content hidden" id="attendance">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Attendance Record</h1>
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <select id="monthFilter" class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="all">All Months</option>
+                        <option value="jan">January</option>
+                        <option value="feb">February</option>
+                        <option value="mar">March</option>
+                        <option value="apr">April</option>
+                        <option value="may">May</option>
+                        <option value="jun">June</option>
+                    </select>
+                    <select id="subjectFilter" class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="all">All Subjects</option>
+                        <option value="math">Mathematics</option>
+                        <option value="physics">Physics</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="biology">Biology</option>
+                        <option value="english">English</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Overall Attendance</h3>
+                        <p class="text-3xl font-bold text-primary">85%</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Present Days</h3>
+                        <p class="text-3xl font-bold text-success">34</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Absent Days</h3>
+                        <p class="text-3xl font-bold text-danger">6</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Leave Days</h3>
+                        <p class="text-3xl font-bold text-warning">2</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Monthly Attendance</h2>
+                    <div class="h-[300px]">
+                        <canvas id="monthlyAttendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Detailed Attendance</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="attendanceTableBody">
+                                <!-- Attendance records will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content hidden" id="reports">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Academic Reports</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Current GPA</h3>
+                        <p class="text-3xl font-bold text-primary">3.7/4.0</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Completed Credits</h3>
+                        <p class="text-3xl font-bold text-success">45/120</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Assignments</h3>
+                        <p class="text-3xl font-bold text-warning">12/15</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Projects</h3>
+                        <p class="text-3xl font-bold text-accent">3/4</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Subject Performance</h2>
+                        <div class="h-[300px]">
+                            <canvas id="subjectPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">GPA Trend</h2>
+                        <div class="h-[300px]">
+                            <canvas id="gpaTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Recent Test Results</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Average</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="testResultsBody">
+                                <!-- Test results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content hidden" id="defaulters">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Attendance Defaulters</h1>
+                
+                <div class="bg-red-50 border-l-4 border-danger p-4 rounded-lg mb-8 flex items-start">
+                    <i class="fas fa-exclamation-circle text-2xl text-danger mr-4 mt-1"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-danger mb-2">Attendance Warning</h3>
+                        <p class="text-gray-700">Your attendance in Data Structure is below the required threshold (75%). Please improve your attendance to avoid academic penalties.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-danger">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Data Structure</h3>
+                        <p class="text-3xl font-bold text-danger mb-2">68%</p>
+                        <p class="text-sm text-gray-500 mb-1">Required: 75%</p>
+                        <p class="text-sm text-danger font-medium mb-4">7% below requirement</p>
+                        <button class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition-colors duration-200" id="requestBtn">Request Consideration</button>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-success">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">DBMS</h3>
+                        <p class="text-3xl font-bold text-success mb-2">92%</p>
+                        <p class="text-sm text-gray-500 mb-1">Required: 75%</p>
+                        <p class="text-sm text-success font-medium">17% above requirement</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-success">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Chemistry</h3>
+                        <p class="text-3xl font-bold text-success mb-2">85%</p>
+                        <p class="text-sm text-gray-500 mb-1">Required: 75%</p>
+                        <p class="text-sm text-success font-medium">10% above requirement</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-success">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Biology</h3>
+                        <p class="text-3xl font-bold text-success mb-2">88%</p>
+                        <p class="text-sm text-gray-500 mb-1">Required: 75%</p>
+                        <p class="text-sm text-success font-medium">13% above requirement</p>
+                    </div>
+                </div>
+
+                <div class="defaulter-history mb-8">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Attendance Improvement Plan</h2>
+                    <div class="improvement-plan">
+                        <div class="plan-item">
+                            <h3 class="font-semibold text-lg text-gray-800 mb-2">Current Status</h3>
+                            <p class="text-gray-600">Your Data Structure attendance is 68%, which is 7% below the required 75%.</p>
+                        </div>
+                        <div class="plan-item">
+                            <h3 class="font-semibold text-lg text-gray-800 mb-2">Required Improvement</h3>
+                            <p class="text-gray-600">You need to attend at least 8 consecutive Data Structure classes to reach the minimum requirement.</p>
+                        </div>
+                        <div class="plan-item">
+                            <h3 class="font-semibold text-lg text-gray-800 mb-2">Consequences</h3>
+                            <p class="text-gray-600">Failure to meet the attendance requirement may result in being barred from the final examination.</p>
+                        </div>
+                        <div class="plan-item">
+                            <h3 class="font-semibold text-lg text-gray-800 mb-2">Support Available</h3>
+                            <p class="text-gray-600">Contact your academic advisor for assistance or to discuss any issues affecting your attendance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content hidden" id="notes">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Notes</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm note-card cursor-pointer border border-gray-100" data-note="1">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Data Structure - Trees</h3>
+                            <p class="text-sm text-gray-500 mb-2">Created: 12 Oct 2023</p>
+                            <p class="text-gray-600 line-clamp-2">Binary trees are hierarchical data structures where each node has at most two children. They are used in many applications including expression parsers and Huffman coding algorithms.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm note-card cursor-pointer border border-gray-100" data-note="2">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">DBMS - Normalization</h3>
+                            <p class="text-sm text-gray-500 mb-2">Created: 10 Oct 2023</p>
+                            <p class="text-gray-600 line-clamp-2">Database normalization is the process of organizing data to minimize redundancy. The main normal forms are 1NF, 2NF, 3NF, BCNF, 4NF and 5NF.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm note-card cursor-pointer border border-gray-100" data-note="3">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Chemistry - Organic Compounds</h3>
+                            <p class="text-sm text-gray-500 mb-2">Created: 8 Oct 2023</p>
+                            <p class="text-gray-600 line-clamp-2">Organic compounds are chemical compounds that contain carbon-hydrogen bonds. They form the basis of all earthly life and include substances like proteins, carbohydrates, and nucleic acids.</p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <input type="text" placeholder="Note Title" class="w-full text-xl font-semibold mb-4 p-2 border-b border-gray-200 focus:border-primary focus:outline-none" id="noteTitle">
+                        <textarea placeholder="Start writing your note here..." class="w-full h-64 p-2 mb-4 border border-gray-200 rounded-lg focus:border-primary focus:outline-none resize-none" id="noteContent"></textarea>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <button class="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors duration-200"><i class="fas fa-bold"></i></button>
+                                <button class="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors duration-200"><i class="fas fa-italic"></i></button>
+                                <button class="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors duration-200"><i class="fas fa-list-ul"></i></button>
+                                <button class="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors duration-200"><i class="fas fa-list-ol"></i></button>
+                            </div>
+                            <button class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors duration-200" id="saveNoteBtn">Save Note</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                document.querySelectorAll('.sidebar-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                    tab.classList.add('hidden');
+                });
+                
+                // Show the selected tab content
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                document.getElementById(tabId).classList.remove('hidden');
+            });
+        });
+
+        // Initialize charts
+        function initCharts() {
+            // Dashboard Attendance Chart
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Attendance (%)',
+                        data: [75, 80, 82, 78, 85, 88],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 100,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Math', 'Physics', 'Chemistry', 'Biology', 'English'],
+                    datasets: [{
+                        label: 'Performance (%)',
+                        data: [85, 78, 82, 75, 80],
+                        backgroundColor: [
+                            '#4361ee',
+                            '#4895ef',
+                            '#3f37c9',
+                            '#4caf50',
+                            '#ff9800'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Monthly Attendance Chart
+            const monthlyCtx = document.getElementById('monthlyAttendanceChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Attendance (%)',
+                        data: [75, 80, 82, 78, 85, 88],
+                        backgroundColor: '#4361ee',
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Subject Performance Chart
+            const subjectCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
+            new Chart(subjectCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Math', 'Physics', 'Chemistry', 'Biology', 'English'],
+                    datasets: [{
+                        label: 'Your Performance',
+                        data: [85, 78, 82, 75, 80],
+                        backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                        borderColor: '#4361ee',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#4361ee'
+                    }, {
+                        label: 'Class Average',
+                        data: [72, 70, 75, 68, 74],
+                        backgroundColor: 'rgba(255, 152, 0, 0.2)',
+                        borderColor: '#ff9800',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ff9800'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 50,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+
+            // GPA Trend Chart
+            const gpaCtx = document.getElementById('gpaTrendChart').getContext('2d');
+            new Chart(gpaCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'],
+                    datasets: [{
+                        label: 'GPA',
+                        data: [3.2, 3.4, 3.5, 3.6, 3.7, 3.8],
+                        borderColor: '#4caf50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 3.0,
+                            max: 4.0,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate attendance table
+        function populateAttendanceTable() {
+            const attendanceData = [
+                { date: '15 May 2023', subject: 'Mathematics', status: 'Present', remarks: '-' },
+                { date: '15 May 2023', subject: 'Physics', status: 'Present', remarks: '-' },
+                { date: '14 May 2023', subject: 'Chemistry', status: 'Absent', remarks: 'Medical Leave' },
+                { date: '14 May 2023', subject: 'Biology', status: 'Absent', remarks: 'Medical Leave' },
+                { date: '13 May 2023', subject: 'Mathematics', status: 'Present', remarks: '-' },
+                { date: '12 May 2023', subject: 'English', status: 'Present', remarks: '-' },
+                { date: '11 May 2023', subject: 'Physics', status: 'Late', remarks: 'Traffic delay' },
+                { date: '10 May 2023', subject: 'Chemistry', status: 'Present', remarks: '-' }
+            ];
+
+            const tableBody = document.getElementById('attendanceTableBody');
+            tableBody.innerHTML = '';
+
+            attendanceData.forEach(item => {
+                const row = document.createElement('tr');
+                let statusClass = '';
+                let statusText = '';
+                
+                if (item.status === 'Present') {
+                    statusClass = 'text-success font-medium';
+                    statusText = 'Present';
+                } else if (item.status === 'Absent') {
+                    statusClass = 'text-danger font-medium';
+                    statusText = 'Absent';
+                } else {
+                    statusClass = 'text-warning font-medium';
+                    statusText = 'Late';
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.subject}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${statusClass}">${statusText}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.remarks}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Populate test results table
+        function populateTestResults() {
+            const testData = [
+                { subject: 'Data Structure', type: 'Quiz', date: '10 May 2023', score: '85%', avg: '72%' },
+                { subject: 'DBMS', type: 'Mid-term', date: '5 May 2023', score: '78%', avg: '68%' },
+                { subject: 'WDT', type: 'Lab Report', date: '2 May 2023', score: '92%', avg: '75%' },
+                { subject: 'Biology', type: 'Assignment', date: '28 Apr 2023', score: '88%', avg: '80%' },
+                { subject: 'English', type: 'Essay', date: '25 Apr 2023', score: '75%', avg: '70%' }
+            ];
+
+            const tableBody = document.getElementById('testResultsBody');
+            tableBody.innerHTML = '';
+
+            testData.forEach(item => {
+                const row = document.createElement('tr');
+                let scoreClass = '';
+                
+                if (parseInt(item.score) > 85) {
+                    scoreClass = 'text-success font-medium';
+                } else if (parseInt(item.score) > 75) {
+                    scoreClass = 'text-warning font-medium';
+                } else {
+                    scoreClass = 'text-danger font-medium';
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.subject}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.type}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${scoreClass}">${item.score}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.avg}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Notes functionality
+        function setupNotes() {
+            const noteCards = document.querySelectorAll('.note-card');
+            const noteTitle = document.getElementById('noteTitle');
+            const noteContent = document.getElementById('noteContent');
+            const saveBtn = document.getElementById('saveNoteBtn');
+            
+            // Sample notes data
+            const notes = {
+                1: {
+                    title: 'Data Structure - Trees',
+                    content: 'Binary trees are hierarchical data structures where each node has at most two children. They are used in many applications including expression parsers and Huffman coding algorithms.\n\nTypes of Binary Trees:\n- Full Binary Tree: Every node has 0 or 2 children\n- Complete Binary Tree: All levels are completely filled except possibly the last level\n- Perfect Binary Tree: All internal nodes have two children and all leaves are at the same level'
+                },
+                2: {
+                    title: 'DBMS - Normalization',
+                    content: 'Database normalization is the process of organizing data to minimize redundancy. The main normal forms are:\n\n1. First Normal Form (1NF):\n   - Each table cell should contain a single value\n   - Each record needs to be unique\n\n2. Second Normal Form (2NF):\n   - Be in 1NF\n   - Single column primary key\n\n3. Third Normal Form (3NF):\n   - Be in 2NF\n   - Has no transitive functional dependencies'
+                },
+                3: {
+                    title: 'Chemistry - Organic Compounds',
+                    content: 'Organic compounds are chemical compounds that contain carbon-hydrogen bonds. They form the basis of all earthly life and include substances like proteins, carbohydrates, and nucleic acids.\n\nKey characteristics:\n- Covalent bonding\n- Low melting and boiling points\n- Flammable\n- Poor conductors of heat and electricity\n\nFunctional groups:\n- Hydroxyl (-OH)\n- Carbonyl (C=O)\n- Carboxyl (-COOH)\n- Amino (-NH2)'
+                }
+            };
+            
+            // Select first note by default
+            noteCards[0].classList.add('active');
+            noteTitle.value = notes[1].title;
+            noteContent.value = notes[1].content;
+            
+            // Add click event to note cards
+            noteCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove active class from all cards
+                    noteCards.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked card
+                    this.classList.add('active');
+                    
+                    // Load note content
+                    const noteId = this.getAttribute('data-note');
+                    noteTitle.value = notes[noteId].title;
+                    noteContent.value = notes[noteId].content;
+                });
+            });
+            
+            // Save note button
+            saveBtn.addEventListener('click', function() {
+                const activeNote = document.querySelector('.note-card.active');
+                if (activeNote) {
+                    const noteId = activeNote.getAttribute('data-note');
+                    notes[noteId].title = noteTitle.value;
+                    notes[noteId].content = noteContent.value;
+                    
+                    // Update card content preview
+                    const cardTitle = activeNote.querySelector('h3');
+                    const cardContent = activeNote.querySelector('p:last-child');
+                    cardTitle.textContent = noteTitle.value;
+                    cardContent.textContent = noteContent.value.substring(0, 100) + '...';
+                    
+                    alert('Note saved successfully!');
+                }
+            });
+        }
+
+        // Notification functionality
+        function setupNotifications() {
+            const notificationIcon = document.getElementById('notificationsIcon');
+            const notificationBadge = document.getElementById('notificationBadge');
+            
+            notificationIcon.addEventListener('click', function() {
+                const count = parseInt(notificationBadge.textContent);
+                if (count > 0) {
+                    notificationBadge.textContent = '0';
+                    notificationBadge.classList.remove('bg-danger');
+                    notificationBadge.classList.add('bg-gray-400');
+                    
+                    // Show notification content (would be implemented in a real app)
+                    alert('Notifications cleared!');
+                }
+            });
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    const searchTerm = searchInput.value.trim();
+                    if (searchTerm) {
+                        alert(`Searching for: ${searchTerm}\nThis would show results in a real application.`);
+                    }
+                }
+            });
+        }
+
+        // Request consideration button
+        document.getElementById('requestBtn').addEventListener('click', function() {
+            alert('Your request for consideration has been submitted to your instructor.');
+        });
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            populateAttendanceTable();
+            populateTestResults();
+            setupNotes();
+            setupNotifications();
+            setupSearch();
+        });
+    </script>
+</body>
+</html>
